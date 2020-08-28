@@ -9,7 +9,7 @@
     <ProductVersion>10.0.20506</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <RootNamespace></RootNamespace>
-    <ProjectGuid>{B4AE43D4-BF5F-9F94-2393-F531F7A1AE5F}</ProjectGuid>
+    <ProjectGuid>{A8F438DF-591C-F810-7165-3EBD2208BE4F}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <AssemblyName>Assembly-CSharp</AssemblyName>
@@ -63,27 +63,28 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\AverageScore.cs" />
-    <Compile Include="Assets\Builder.cs" />
-    <Compile Include="Assets\Cam.cs" />
-    <Compile Include="Assets\CameraManager.cs" />
-    <Compile Include="Assets\GlobalScaler.cs" />
-    <Compile Include="Assets\Grid.cs" />
-    <Compile Include="Assets\GridInteraction.cs" />
-    <Compile Include="Assets\LightCalculator.cs" />
-    <Compile Include="Assets\LightLevel.cs" />
-    <Compile Include="Assets\Menu.cs" />
-    <Compile Include="Assets\ScaleText.cs" />
-    <Compile Include="Assets\SwarmOptimizer.cs" />
-    <Compile Include="Assets\Switch.cs" />
-    <Compile Include="Assets\Test.cs" />
-    <Compile Include="Assets\Toggle.cs" />
-    <Compile Include="Assets\Tooltip.cs" />
-    <None Include="Assets\Intensity_2.txt" />
-    <None Include="Assets\energy generation.txt" />
-    <None Include="Assets\Angle with Horizon.txt" />
-    <None Include="Assets\Intensity_1.txt" />
-    <None Include="Assets\Azimuth.txt" />
+    <Compile Include="Assets\Scripts\AverageScore.cs" />
+    <Compile Include="Assets\Scripts\Builder.cs" />
+    <Compile Include="Assets\Scripts\CameraMovement.cs" />
+    <Compile Include="Assets\Scripts\GlobalScaler.cs" />
+    <Compile Include="Assets\Scripts\Grid.cs" />
+    <Compile Include="Assets\Scripts\GridInteraction.cs" />
+    <Compile Include="Assets\Scripts\LightCalculator.cs" />
+    <Compile Include="Assets\Scripts\LightLevel.cs" />
+    <Compile Include="Assets\Scripts\Menu.cs" />
+    <Compile Include="Assets\Scripts\OptimizationParameterManager.cs" />
+    <Compile Include="Assets\Scripts\ProcessTracker.cs" />
+    <Compile Include="Assets\Scripts\ScaleText.cs" />
+    <Compile Include="Assets\Scripts\SwarmOptimizer.cs" />
+    <Compile Include="Assets\Scripts\Switch.cs" />
+    <Compile Include="Assets\Scripts\Test.cs" />
+    <Compile Include="Assets\Scripts\Toggle.cs" />
+    <Compile Include="Assets\Scripts\Tooltip.cs" />
+    <None Include="Assets\Resources\Data\Intensity_2.txt" />
+    <None Include="Assets\Resources\Data\energy generation.txt" />
+    <None Include="Assets\Resources\Data\Angle with Horizon.txt" />
+    <None Include="Assets\Resources\Data\Intensity_1.txt" />
+    <None Include="Assets\Resources\Data\Azimuth.txt" />
     <Reference Include="UnityEngine">
       <HintPath>C:/Program Files/Unity/Hub/Editor/2019.3.15f1/Editor/Data/Managed/UnityEngine/UnityEngine.dll</HintPath>
     </Reference>
@@ -613,31 +614,31 @@
       <HintPath>C:/Program Files/Unity/Hub/Editor/2019.3.15f1/Editor/Data/NetStandard/compat/2.0.0/shims/netfx/System.Xml.Serialization.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Timeline.Editor">
-      <HintPath>C:/Users/Nathan/Documents/pso/Library/ScriptAssemblies/Unity.Timeline.Editor.dll</HintPath>
+      <HintPath>C:/Users/Nathan/Documents/Particle Swarm Optimizer/Library/ScriptAssemblies/Unity.Timeline.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.VSCode.Editor">
-      <HintPath>C:/Users/Nathan/Documents/pso/Library/ScriptAssemblies/Unity.VSCode.Editor.dll</HintPath>
+      <HintPath>C:/Users/Nathan/Documents/Particle Swarm Optimizer/Library/ScriptAssemblies/Unity.VSCode.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.TextMeshPro.Editor">
-      <HintPath>C:/Users/Nathan/Documents/pso/Library/ScriptAssemblies/Unity.TextMeshPro.Editor.dll</HintPath>
+      <HintPath>C:/Users/Nathan/Documents/Particle Swarm Optimizer/Library/ScriptAssemblies/Unity.TextMeshPro.Editor.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UI">
-      <HintPath>C:/Users/Nathan/Documents/pso/Library/ScriptAssemblies/UnityEngine.UI.dll</HintPath>
+      <HintPath>C:/Users/Nathan/Documents/Particle Swarm Optimizer/Library/ScriptAssemblies/UnityEngine.UI.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Timeline">
-      <HintPath>C:/Users/Nathan/Documents/pso/Library/ScriptAssemblies/Unity.Timeline.dll</HintPath>
+      <HintPath>C:/Users/Nathan/Documents/Particle Swarm Optimizer/Library/ScriptAssemblies/Unity.Timeline.dll</HintPath>
     </Reference>
     <Reference Include="Unity.CollabProxy.Editor">
-      <HintPath>C:/Users/Nathan/Documents/pso/Library/ScriptAssemblies/Unity.CollabProxy.Editor.dll</HintPath>
+      <HintPath>C:/Users/Nathan/Documents/Particle Swarm Optimizer/Library/ScriptAssemblies/Unity.CollabProxy.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Rider.Editor">
-      <HintPath>C:/Users/Nathan/Documents/pso/Library/ScriptAssemblies/Unity.Rider.Editor.dll</HintPath>
+      <HintPath>C:/Users/Nathan/Documents/Particle Swarm Optimizer/Library/ScriptAssemblies/Unity.Rider.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.TextMeshPro">
-      <HintPath>C:/Users/Nathan/Documents/pso/Library/ScriptAssemblies/Unity.TextMeshPro.dll</HintPath>
+      <HintPath>C:/Users/Nathan/Documents/Particle Swarm Optimizer/Library/ScriptAssemblies/Unity.TextMeshPro.dll</HintPath>
     </Reference>
     <Reference Include="UnityEditor.UI">
-      <HintPath>C:/Users/Nathan/Documents/pso/Library/ScriptAssemblies/UnityEditor.UI.dll</HintPath>
+      <HintPath>C:/Users/Nathan/Documents/Particle Swarm Optimizer/Library/ScriptAssemblies/UnityEditor.UI.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup></ItemGroup>
