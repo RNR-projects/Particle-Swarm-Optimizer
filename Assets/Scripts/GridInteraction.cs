@@ -5,39 +5,49 @@ using UnityEngine.UI;
 
 public class GridInteraction : MonoBehaviour {
 	public Button button;
-	public int xIndex, yIndex, setNo;
-	public bool selected = false;
-	private Grid grid;
+	public int xIndex, yIndex;
+	private bool selected = false;
+	private bool shouldHighlight = false;
 
-	void Start () {
-		grid = this.transform.GetComponentInParent<Grid> ();
+    private void Update()
+    {
+		if (!this.selected)
+		{
+			if (this.shouldHighlight)
+			{
+				this.button.image.color = Color.green;
+			}
+			else
+				this.button.image.color = Color.white;
+			this.shouldHighlight = false;
+		}
+		
+    }
+
+    public void SetEdge()
+	{
+		BuildingLocationsManager.Instance().RegisterEdge(this.xIndex, this.yIndex);
 	}
 
-	void Update () {
+	public int[] GetTemporaryEdge() {
+		int[] coordinates = new int[2];
+		coordinates[0] = this.xIndex;
+		coordinates[1] = this.yIndex;
+		return coordinates;
+	}
+
+	public void SelectBlock(bool value)
+    {
+		this.selected = value;
 		if (selected)
 			button.image.color = Color.green;
 		else
 			button.image.color = Color.white;
 	}
 
-	public void setEdge() {
-		if (!grid.highlighting) {
-			grid.createNewSet ();
-			grid.highlighting = true;
-			grid.xEdge1[grid.coordSet - 1] = xIndex;
-			grid.yEdge1[grid.coordSet - 1] = yIndex;
-			grid.xEdge2[grid.coordSet - 1] = xIndex;
-			grid.yEdge2[grid.coordSet - 1] = yIndex;
-		} else {
-			grid.highlighting = false;
-			grid.xEdge2[grid.coordSet - 1] = xIndex;
-			grid.yEdge2[grid.coordSet - 1] = yIndex;
-			grid.SetHeight ();
-		}
-	}
-
-	public void setOtherEdge() {
-		grid.xEdge2[grid.coordSet - 1] = xIndex;
-		grid.yEdge2[grid.coordSet - 1] = yIndex;
-	}
+	public void HighlightBlock()
+    {
+		if (!this.selected)
+			this.shouldHighlight = true;
+    }
 }

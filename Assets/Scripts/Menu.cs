@@ -19,6 +19,9 @@ public class Menu : MonoBehaviour {
 
 	void Awake () {
 		PressAlternatingArrangement();//default setting
+		PressGreaterThanHeight();
+		PressGreaterThanCount();
+
 		roadLength.onEndEdit.AddListener(AdjustRoadLength);
 		roadWidth.onEndEdit.AddListener(AdjustRoadWidth);
 		minimumIlluminance.onEndEdit.AddListener(AdjustMinimumIlluminance);
@@ -84,7 +87,10 @@ public class Menu : MonoBehaviour {
 	public void PressLessThanHeight()
     {
 		if (greaterThanHeight.pressed)
+		{
 			greaterThanHeight.click();
+			lessThanHeight.click();
+		}
 		else if (lessThanHeight.pressed)
 		{
 			if (equalToHeight.pressed)
@@ -97,13 +103,23 @@ public class Menu : MonoBehaviour {
 
 	public void PressEqualToHeight()
     {
+		if (equalToHeight.pressed)
+		{
+			if (greaterThanHeight.pressed || lessThanHeight.pressed)
+				equalToHeight.click();
+		}
+		else
+			equalToHeight.click();
 		OptimizationParameterManager.Instance().ToggleEqualToHeightPivot();
     }
 
 	public void PressGreaterThanHeight()
     {
 		if (lessThanHeight.pressed)
+		{
 			lessThanHeight.click();
+			greaterThanHeight.click();
+		}
 		else if (greaterThanHeight.pressed)
 		{
 			if (equalToHeight.pressed)
@@ -117,7 +133,10 @@ public class Menu : MonoBehaviour {
 	public void PressLessThanCount()
     {
 		if (greaterThanCount.pressed)
+		{
 			greaterThanCount.click();
+			lessThanCount.click();
+		}
 		else if (lessThanCount.pressed)
 		{
 			if (equalToCount.pressed)
@@ -130,13 +149,23 @@ public class Menu : MonoBehaviour {
 
 	public void PressEqualToCount()
     {
+		if (equalToCount.pressed)
+		{
+			if (greaterThanCount.pressed || lessThanCount.pressed)
+				equalToCount.click();
+		}
+		else
+			equalToCount.click();
 		OptimizationParameterManager.Instance().ToggleEqualToCountPivot();
     }
 
 	public void PressGreaterThanCount()
     {
 		if (lessThanCount.pressed)
+		{
 			lessThanCount.click();
+			greaterThanCount.click();
+		}
 		else if (greaterThanCount.pressed)
 		{
 			if (equalToCount.pressed)
@@ -149,41 +178,41 @@ public class Menu : MonoBehaviour {
 
 	public void PressAlternatingArrangement()
     {
-		if (oneSidedArrangement.pressed || pairedArrangement.pressed)
+		if (!alternatingArrangement.pressed)
 		{
 			if (oneSidedArrangement.pressed)
 				oneSidedArrangement.click();
 			else if (pairedArrangement.pressed)
 				pairedArrangement.click();
 			alternatingArrangement.click();
+			OptimizationParameterManager.Instance().SetLuminaireArrangement(OptimizationParameterManager.LuminaireArrangementSettings.Alternating);
 		}
-		OptimizationParameterManager.Instance().SetLuminaireArrangement(OptimizationParameterManager.LuminaireArrangementSettings.Alternating);
     }
 
 	public void PressOneSidedArrangement()
     {
-		if (alternatingArrangement.pressed || pairedArrangement.pressed)
+		if (!oneSidedArrangement.pressed)
 		{
 			if (alternatingArrangement.pressed)
 				alternatingArrangement.click();
 			else if (pairedArrangement.pressed)
 				pairedArrangement.click();
 			oneSidedArrangement.click();
-		}
-		OptimizationParameterManager.Instance().SetLuminaireArrangement(OptimizationParameterManager.LuminaireArrangementSettings.OneSided);
+			OptimizationParameterManager.Instance().SetLuminaireArrangement(OptimizationParameterManager.LuminaireArrangementSettings.OneSided);
+		}	
 	}
 
 	public void PressPairedArrangement()
     {
-		if (alternatingArrangement.pressed || oneSidedArrangement.pressed)
+		if (!pairedArrangement.pressed)
 		{
 			if (alternatingArrangement.pressed)
 				alternatingArrangement.click();
 			else if (oneSidedArrangement.pressed)
 				oneSidedArrangement.click();
 			pairedArrangement.click();
+			OptimizationParameterManager.Instance().SetLuminaireArrangement(OptimizationParameterManager.LuminaireArrangementSettings.Paired);
 		}
-		OptimizationParameterManager.Instance().SetLuminaireArrangement(OptimizationParameterManager.LuminaireArrangementSettings.Paired);
 	}
 
 	public void ProceedToGrid()
@@ -198,6 +227,7 @@ public class Menu : MonoBehaviour {
 		this.currentProgress = ProgressLevel.RoadParameters;
 		this.lightingParameterUI.SetActive(false);
 		this.roadParameterUI.SetActive(true);
+		this.PressAlternatingArrangement();
     }
 
 	public void ChangeGlobalScale ()

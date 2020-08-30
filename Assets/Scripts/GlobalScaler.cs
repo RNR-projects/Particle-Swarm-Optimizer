@@ -15,6 +15,11 @@ public class GlobalScaler {
 		return sharedInstance;
     }
 
+	private GlobalScaler()
+    {
+		GlobalScale = 25f;
+    }
+
 	public void SetGlobalScale(float value) {
 		this.GlobalScale = value;
 	}

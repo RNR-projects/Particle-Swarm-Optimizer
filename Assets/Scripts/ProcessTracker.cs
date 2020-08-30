@@ -4,67 +4,65 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class ProcessTracker : MonoBehaviour {
-	public Button toSwarm;
 	public Texture2D tex;
 	private SwarmOptimizer swarm;
-	public Grid grid;
 	public GameObject structure;
-	private bool buildingsAreInstantiated = false;
-	[SerializeField] GameObject AreaLayoutUI, MainMenuUI, SwarmOptimizerUI;
+	[SerializeField] GameObject AreaLayoutObjects, MainMenuObjects, SwarmOptimizerObjects;
+	private OptimizationSteps currentStep;
 
-	void Start () {
+	public enum OptimizationSteps
+    {
+		MainMenu = 1,
+		AreaLayout = 2,
+		SwarmOptimization = 3
+    }
+
+	void Awake () {
 		Cursor.lockState = CursorLockMode.None;
 		Cursor.visible = true;
-		swarm = GameObject.Find("Swarm").GetComponent<SwarmOptimizer> ();
-		Camera.main.transform.position = new Vector3 (swarm.roadLength / 2 * GlobalScaler.Instance().GetGlobalScale(),
-			8 * GlobalScaler.Instance().GetGlobalScale(), -swarm.roadWidth * 2 * GlobalScaler.Instance().GetGlobalScale());
+		this.currentStep = OptimizationSteps.MainMenu;
+		//swarm = GameObject.Find("Swarm").GetComponent<SwarmOptimizer> ();
+		//Camera.main.transform.position = new Vector3 (swarm.roadLength / 2 * GlobalScaler.Instance().GetGlobalScale(),
+		//	8 * GlobalScaler.Instance().GetGlobalScale(), -swarm.roadWidth * 2 * GlobalScaler.Instance().GetGlobalScale());
 	}
 
 	void Update () {
-		Cursor.visible = true;
-		if (Input.GetKeyDown (KeyCode.Escape) && MainMenuUI.activeSelf) {
-			Cursor.lockState = CursorLockMode.None;
-			Cursor.SetCursor (null, new Vector2 (0, 0), CursorMode.Auto);
-		}
-		if (AreaLayoutUI.activeSelf) {
-			if (Input.GetMouseButton (1))//right click
-				Cursor.lockState = CursorLockMode.None;
-			
+		if (Input.GetKeyDown (KeyCode.Escape) && !MainMenuObjects.activeSelf) {
+			this.ToMainMenu();
 		}
 	}
 
-	public void ToGrid() {
-		Cursor.lockState = CursorLockMode.Locked;
-		swarm.ClearData ();
-		GameObject[] road = GameObject.FindGameObjectsWithTag ("Finish");
-		for (int i = 0; i < road.Length; i++)
-			Destroy (road[i]);
-		AreaLayoutUI.SetActive(true);
-		MainMenuUI.SetActive(false);
+	public void ToGridCreator() {
+		AreaLayoutObjects.SetActive(true);
+		MainMenuObjects.SetActive(false);
+		this.currentStep = OptimizationSteps.AreaLayout;
 
-		Camera.main.transform.position = new Vector3 (swarm.roadLength / 2 * GlobalScaler.Instance().GetGlobalScale(), 
-			8 * GlobalScaler.Instance().GetGlobalScale(), swarm.roadWidth / 2 * GlobalScaler.Instance().GetGlobalScale());
-		Camera.main.GetComponent<CameraMovement> ().Vangle = -90;
-		Camera.main.GetComponent<CameraMovement> ().Hangle = 0;
+		Camera.main.transform.position = new Vector3 (0, 2 * GlobalScaler.Instance().GetGlobalScale(), 
+						OptimizationParameterManager.Instance().GetRoadWidth() / 2 * GlobalScaler.Instance().GetGlobalScale());
+
+		Camera.main.GetComponent<CameraMovement> ().SetVerticalAngle(0);
+		Camera.main.GetComponent<CameraMovement> ().SetHorizontalAngle(0);
 		Cursor.SetCursor(tex, new Vector2(0, 0), CursorMode.Auto);
-		Cursor.visible = true;
+		Cursor.lockState = CursorLockMode.Locked;
 
-		buildingsAreInstantiated = false;
-		for (int i = 0; i < grid.coordSet; i++)
-			Destroy (grid.buildings [i]);
+		if (!AreaLayoutObjects.GetComponentInChildren<GridCreator>().AreaLayoutInstantiated())
+		{
+			AreaLayoutObjects.GetComponentInChildren<GridCreator>().CreateNewGrid();
+		}
 	}
 
 	public void ToSwarm() {
 		Camera.main.transform.position = new Vector3 (swarm.roadLength / 2 * GlobalScaler.Instance().GetGlobalScale(), 
 			8 * GlobalScaler.Instance().GetGlobalScale(), swarm.roadWidth / 2 * GlobalScaler.Instance().GetGlobalScale());
-		Camera.main.GetComponent<CameraMovement> ().Vangle = -90;
-		Camera.main.GetComponent<CameraMovement> ().Hangle = 0;
-		MainMenuUI.SetActive(false);
-		SwarmOptimizerUI.SetActive(true);
+		Camera.main.GetComponent<CameraMovement> ().SetVerticalAngle(-90);
+		Camera.main.GetComponent<CameraMovement> ().SetHorizontalAngle(0);
+		MainMenuObjects.SetActive(false);
+		SwarmOptimizerObjects.SetActive(true);
+		this.currentStep = OptimizationSteps.SwarmOptimization;
 		Cursor.lockState = CursorLockMode.Locked;
 		Cursor.SetCursor (tex, new Vector2 (0, 0), CursorMode.Auto);
 
-		if (!buildingsAreInstantiated) {
+		/*if (!buildingsAreInstantiated) {
 			grid.buildings = new GameObject[grid.coordSet];
 			for (int i = 0; i < grid.coordSet; i++) {
 				if (grid.yEdge1 [i] < 5 && grid.yEdge2 [i] < 5) {
@@ -95,6 +93,28 @@ public class ProcessTracker : MonoBehaviour {
 			for (int i = 0; i < gridSpace.Length; i++)
 				Destroy (gridSpace [i]);
 			grid.instantiated = false;
-		}
+		}*/
 	}
+
+	private void ToMainMenu()
+    {
+		switch(this.currentStep)
+        {
+			case OptimizationSteps.AreaLayout:
+				AreaLayoutObjects.SetActive(false);
+				break;
+			case OptimizationSteps.SwarmOptimization:
+				SwarmOptimizerObjects.SetActive(false);
+				break;
+        }
+		Cursor.lockState = CursorLockMode.None;
+		Cursor.SetCursor(null, new Vector2(0, 0), CursorMode.Auto);
+
+		MainMenuObjects.SetActive(true);
+    }
+
+	public OptimizationSteps GetCurrentStep()
+    {
+		return this.currentStep;
+    }
 }

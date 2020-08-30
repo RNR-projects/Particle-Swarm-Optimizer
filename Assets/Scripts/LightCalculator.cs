@@ -15,9 +15,8 @@ public class LightCalculator : MonoBehaviour
     public GameObject luminaire;
 	public Camera mainCam;
 	public SwarmOptimizer swarm;
-	public Grid grid;
+	public GridCreator grid;
 	public TextAsset textFile, solarGenerationFile, azimuthFile, horizonAngleFile;
-	public GlobalScaler scaler;
 	public LayerMask hitbox, structure;
 	private RaycastHit hit;
 	private RaycastHit[] lamps;
@@ -28,8 +27,7 @@ public class LightCalculator : MonoBehaviour
 
     void Start()
     {
-		scaler = GameObject.Find ("GlobalScaler").GetComponent<GlobalScaler>();
-		grid = GameObject.Find ("Grid").GetComponent<Grid> ();
+		grid = GameObject.Find ("GridCreator").GetComponent<GridCreator> ();
 		swarm = this.transform.GetComponentInChildren<SwarmOptimizer>();
         text = GetComponent<Text>();
 		string textContent = textFile.text;
@@ -161,13 +159,13 @@ public class LightCalculator : MonoBehaviour
 		}
 		for (int x = 0; x < lumCount; x++) {
 			if (swarm.arrangement1) {
-				if (Physics.CheckBox (new Vector3 ((spacing * x + (swarm.roadLength % spacing) / 2f) * scaler.GlobalScale, 0, roadWidth * Mathf.Abs (Mathf.Sin (Mathf.Deg2Rad * 90 * x)) * scaler.GlobalScale), new Vector3 (0.5f * scaler.GlobalScale, 2f * scaler.GlobalScale, 0.5f * scaler.GlobalScale), Quaternion.identity, structure)) {
+				if (Physics.CheckBox (new Vector3 ((spacing * x + (swarm.roadLength % spacing) / 2f) * GlobalScaler.Instance().GetGlobalScale(), 0, roadWidth * Mathf.Abs (Mathf.Sin (Mathf.Deg2Rad * 90 * x)) * GlobalScaler.Instance().GetGlobalScale()), new Vector3 (0.5f * GlobalScaler.Instance().GetGlobalScale(), 2f * GlobalScaler.Instance().GetGlobalScale(), 0.5f * GlobalScaler.Instance().GetGlobalScale()), Quaternion.identity, structure)) {
 					for (int j = 0; j < lumCount; j++) {
-						if (Physics.CheckBox (new Vector3 ((spacing * j + (swarm.roadLength % spacing) / 2f) * scaler.GlobalScale, 0, roadWidth * Mathf.Abs (Mathf.Cos (Mathf.Deg2Rad * 90 * j)) * scaler.GlobalScale), new Vector3 (0.5f * scaler.GlobalScale, 2f * scaler.GlobalScale, 0.5f * scaler.GlobalScale), Quaternion.identity, structure)) {
+						if (Physics.CheckBox (new Vector3 ((spacing * j + (swarm.roadLength % spacing) / 2f) * GlobalScaler.Instance().GetGlobalScale(), 0, roadWidth * Mathf.Abs (Mathf.Cos (Mathf.Deg2Rad * 90 * j)) * GlobalScaler.Instance().GetGlobalScale()), new Vector3 (0.5f * GlobalScaler.Instance().GetGlobalScale(), 2f * GlobalScaler.Instance().GetGlobalScale(), 0.5f * GlobalScaler.Instance().GetGlobalScale()), Quaternion.identity, structure)) {
 							buildable = false;
-							Collider[] str = Physics.OverlapBox (new Vector3 ((spacing * j + (swarm.roadLength % spacing) / 2f) * scaler.GlobalScale, 0, roadWidth * Mathf.Abs (Mathf.Cos (Mathf.Deg2Rad * 90 * j)) * scaler.GlobalScale), new Vector3 (0.5f * scaler.GlobalScale, 2f * scaler.GlobalScale, 0.5f * scaler.GlobalScale), Quaternion.identity, structure);
-							RPoffsets [j] = (str [0].transform.position.x + str [0].transform.lossyScale.x / 2f) / scaler.GlobalScale - (spacing * j + (swarm.roadLength % spacing) / 2f) + 0.5f;
-							RNoffsets [j] = ((str [0].transform.position.x - str [0].transform.lossyScale.x / 2f) / scaler.GlobalScale - (spacing * j + (swarm.roadLength % spacing) / 2f)) - 0.5f;
+							Collider[] str = Physics.OverlapBox (new Vector3 ((spacing * j + (swarm.roadLength % spacing) / 2f) * GlobalScaler.Instance().GetGlobalScale(), 0, roadWidth * Mathf.Abs (Mathf.Cos (Mathf.Deg2Rad * 90 * j)) * GlobalScaler.Instance().GetGlobalScale()), new Vector3 (0.5f * GlobalScaler.Instance().GetGlobalScale(), 2f * GlobalScaler.Instance().GetGlobalScale(), 0.5f * GlobalScaler.Instance().GetGlobalScale()), Quaternion.identity, structure);
+							RPoffsets [j] = (str [0].transform.position.x + str [0].transform.lossyScale.x / 2f) / GlobalScaler.Instance().GetGlobalScale() - (spacing * j + (swarm.roadLength % spacing) / 2f) + 0.5f;
+							RNoffsets [j] = ((str [0].transform.position.x - str [0].transform.lossyScale.x / 2f) / GlobalScaler.Instance().GetGlobalScale() - (spacing * j + (swarm.roadLength % spacing) / 2f)) - 0.5f;
 						} else {
 							RPoffsets [j] = 0;
 							RNoffsets [j] = 0;
@@ -179,10 +177,10 @@ public class LightCalculator : MonoBehaviour
 					}
 					if (!buildable) {
 						for (int y = 0; y < lumCount; y++) {
-							if (Physics.CheckBox (new Vector3 ((spacing * y + (swarm.roadLength % spacing) / 2f) * scaler.GlobalScale, 0, roadWidth * Mathf.Abs (Mathf.Sin (Mathf.Deg2Rad * 90 * y)) * scaler.GlobalScale), new Vector3 (0.5f * scaler.GlobalScale, 2f * scaler.GlobalScale, 0.5f * scaler.GlobalScale), Quaternion.identity, structure)) {
-								Collider[] str = Physics.OverlapBox (new Vector3 ((spacing * y + (swarm.roadLength % spacing) / 2f) * scaler.GlobalScale, 0, roadWidth * Mathf.Abs (Mathf.Sin (Mathf.Deg2Rad * 90 * y)) * scaler.GlobalScale), new Vector3 (0.5f * scaler.GlobalScale, 2f * scaler.GlobalScale, 0.5f * scaler.GlobalScale), Quaternion.identity, structure);
-								OPoffsets [y] = (str [0].transform.position.x + str [0].transform.lossyScale.x / 2f) / scaler.GlobalScale - (spacing * y + (swarm.roadLength % spacing) / 2f) + 0.5f;
-								ONoffsets [y] = ((str [0].transform.position.x - str [0].transform.lossyScale.x / 2f) / scaler.GlobalScale - (spacing * y + (swarm.roadLength % spacing) / 2f)) - 0.5f;
+							if (Physics.CheckBox (new Vector3 ((spacing * y + (swarm.roadLength % spacing) / 2f) * GlobalScaler.Instance().GetGlobalScale(), 0, roadWidth * Mathf.Abs (Mathf.Sin (Mathf.Deg2Rad * 90 * y)) * GlobalScaler.Instance().GetGlobalScale()), new Vector3 (0.5f * GlobalScaler.Instance().GetGlobalScale(), 2f * GlobalScaler.Instance().GetGlobalScale(), 0.5f * GlobalScaler.Instance().GetGlobalScale()), Quaternion.identity, structure)) {
+								Collider[] str = Physics.OverlapBox (new Vector3 ((spacing * y + (swarm.roadLength % spacing) / 2f) * GlobalScaler.Instance().GetGlobalScale(), 0, roadWidth * Mathf.Abs (Mathf.Sin (Mathf.Deg2Rad * 90 * y)) * GlobalScaler.Instance().GetGlobalScale()), new Vector3 (0.5f * GlobalScaler.Instance().GetGlobalScale(), 2f * GlobalScaler.Instance().GetGlobalScale(), 0.5f * GlobalScaler.Instance().GetGlobalScale()), Quaternion.identity, structure);
+								OPoffsets [y] = (str [0].transform.position.x + str [0].transform.lossyScale.x / 2f) / GlobalScaler.Instance().GetGlobalScale() - (spacing * y + (swarm.roadLength % spacing) / 2f) + 0.5f;
+								ONoffsets [y] = ((str [0].transform.position.x - str [0].transform.lossyScale.x / 2f) / GlobalScaler.Instance().GetGlobalScale() - (spacing * y + (swarm.roadLength % spacing) / 2f)) - 0.5f;
 							} else {
 								OPoffsets [y] = 0;
 								ONoffsets [y] = 0;
@@ -192,13 +190,13 @@ public class LightCalculator : MonoBehaviour
 					}
 				}
 			} else if (swarm.arrangement2) {
-				if (Physics.CheckBox (new Vector3 ((spacing * x + (swarm.roadLength % spacing) / 2f) * scaler.GlobalScale, 0, 0), new Vector3 (0.5f * scaler.GlobalScale, 2f * scaler.GlobalScale, 0.5f * scaler.GlobalScale), Quaternion.identity, structure)) {
+				if (Physics.CheckBox (new Vector3 ((spacing * x + (swarm.roadLength % spacing) / 2f) * GlobalScaler.Instance().GetGlobalScale(), 0, 0), new Vector3 (0.5f * GlobalScaler.Instance().GetGlobalScale(), 2f * GlobalScaler.Instance().GetGlobalScale(), 0.5f * GlobalScaler.Instance().GetGlobalScale()), Quaternion.identity, structure)) {
 					for (int j = 0; j < lumCount; j++) {
-						if (Physics.CheckBox (new Vector3 ((spacing * j + (swarm.roadLength % spacing) / 2f) * scaler.GlobalScale, 0, roadWidth * scaler.GlobalScale), new Vector3 (0.5f * scaler.GlobalScale, 2f * scaler.GlobalScale, 0.5f * scaler.GlobalScale), Quaternion.identity, structure)) {
+						if (Physics.CheckBox (new Vector3 ((spacing * j + (swarm.roadLength % spacing) / 2f) * GlobalScaler.Instance().GetGlobalScale(), 0, roadWidth * GlobalScaler.Instance().GetGlobalScale()), new Vector3 (0.5f * GlobalScaler.Instance().GetGlobalScale(), 2f * GlobalScaler.Instance().GetGlobalScale(), 0.5f * GlobalScaler.Instance().GetGlobalScale()), Quaternion.identity, structure)) {
 							buildable = false;
-							Collider[] str = Physics.OverlapBox (new Vector3 ((spacing * j + (swarm.roadLength % spacing) / 2f) * scaler.GlobalScale, 0, roadWidth * scaler.GlobalScale), new Vector3 (0.5f * scaler.GlobalScale, 2f * scaler.GlobalScale, 0.5f * scaler.GlobalScale), Quaternion.identity, structure);
-							RPoffsets [j] = (str [0].transform.position.x + str [0].transform.lossyScale.x / 2f) / scaler.GlobalScale - (spacing * j + (swarm.roadLength % spacing) / 2f) + 0.5f;
-							RNoffsets [j] = ((str [0].transform.position.x - str [0].transform.lossyScale.x / 2f) / scaler.GlobalScale - (spacing * j + (swarm.roadLength % spacing) / 2f)) - 0.5f;
+							Collider[] str = Physics.OverlapBox (new Vector3 ((spacing * j + (swarm.roadLength % spacing) / 2f) * GlobalScaler.Instance().GetGlobalScale(), 0, roadWidth * GlobalScaler.Instance().GetGlobalScale()), new Vector3 (0.5f * GlobalScaler.Instance().GetGlobalScale(), 2f * GlobalScaler.Instance().GetGlobalScale(), 0.5f * GlobalScaler.Instance().GetGlobalScale()), Quaternion.identity, structure);
+							RPoffsets [j] = (str [0].transform.position.x + str [0].transform.lossyScale.x / 2f) / GlobalScaler.Instance().GetGlobalScale() - (spacing * j + (swarm.roadLength % spacing) / 2f) + 0.5f;
+							RNoffsets [j] = ((str [0].transform.position.x - str [0].transform.lossyScale.x / 2f) / GlobalScaler.Instance().GetGlobalScale() - (spacing * j + (swarm.roadLength % spacing) / 2f)) - 0.5f;
 						} else {
 							RPoffsets [j] = 0;
 							RNoffsets [j] = 0;
@@ -210,10 +208,10 @@ public class LightCalculator : MonoBehaviour
 					}
 					if (!buildable) {
 						for (int y = 0; y < lumCount; y++) {
-							if (Physics.CheckBox (new Vector3 ((spacing * y + (swarm.roadLength % spacing) / 2f) * scaler.GlobalScale, 0, 0), new Vector3 (0.5f * scaler.GlobalScale, 2f * scaler.GlobalScale, 0.5f * scaler.GlobalScale), Quaternion.identity, structure)) {
-								Collider[] str = Physics.OverlapBox (new Vector3 ((spacing * y + (swarm.roadLength % spacing) / 2f) * scaler.GlobalScale, 0, 0), new Vector3 (0.5f * scaler.GlobalScale, 2f * scaler.GlobalScale, 0.5f * scaler.GlobalScale), Quaternion.identity, structure);
-								OPoffsets [y] = (str [0].transform.position.x + str [0].transform.lossyScale.x / 2f) / scaler.GlobalScale - (spacing * y + (swarm.roadLength % spacing) / 2f) + 0.5f;
-								ONoffsets [y] = ((str [0].transform.position.x - str [0].transform.lossyScale.x / 2f) / scaler.GlobalScale - (spacing * y + (swarm.roadLength % spacing) / 2f)) - 0.5f;
+							if (Physics.CheckBox (new Vector3 ((spacing * y + (swarm.roadLength % spacing) / 2f) * GlobalScaler.Instance().GetGlobalScale(), 0, 0), new Vector3 (0.5f * GlobalScaler.Instance().GetGlobalScale(), 2f * GlobalScaler.Instance().GetGlobalScale(), 0.5f * GlobalScaler.Instance().GetGlobalScale()), Quaternion.identity, structure)) {
+								Collider[] str = Physics.OverlapBox (new Vector3 ((spacing * y + (swarm.roadLength % spacing) / 2f) * GlobalScaler.Instance().GetGlobalScale(), 0, 0), new Vector3 (0.5f * GlobalScaler.Instance().GetGlobalScale(), 2f * GlobalScaler.Instance().GetGlobalScale(), 0.5f * GlobalScaler.Instance().GetGlobalScale()), Quaternion.identity, structure);
+								OPoffsets [y] = (str [0].transform.position.x + str [0].transform.lossyScale.x / 2f) / GlobalScaler.Instance().GetGlobalScale() - (spacing * y + (swarm.roadLength % spacing) / 2f) + 0.5f;
+								ONoffsets [y] = ((str [0].transform.position.x - str [0].transform.lossyScale.x / 2f) / GlobalScaler.Instance().GetGlobalScale() - (spacing * y + (swarm.roadLength % spacing) / 2f)) - 0.5f;
 							} else {
 								OPoffsets [y] = 0;
 								ONoffsets [y] = 0;
@@ -223,12 +221,12 @@ public class LightCalculator : MonoBehaviour
 					}
 				}
 			} else if (swarm.arrangement3) {
-				if (Physics.CheckBox (new Vector3 ((spacing * Mathf.Floor (x / 2f) + (swarm.roadLength % spacing) / 2f) * scaler.GlobalScale, 0, roadWidth * Mathf.Abs (Mathf.Sin (Mathf.Deg2Rad * 90 * x)) * scaler.GlobalScale), new Vector3 (0.25f * scaler.GlobalScale, 2f * scaler.GlobalScale, 0.25f * scaler.GlobalScale), Quaternion.identity, structure)) {
+				if (Physics.CheckBox (new Vector3 ((spacing * Mathf.Floor (x / 2f) + (swarm.roadLength % spacing) / 2f) * GlobalScaler.Instance().GetGlobalScale(), 0, roadWidth * Mathf.Abs (Mathf.Sin (Mathf.Deg2Rad * 90 * x)) * GlobalScaler.Instance().GetGlobalScale()), new Vector3 (0.25f * GlobalScaler.Instance().GetGlobalScale(), 2f * GlobalScaler.Instance().GetGlobalScale(), 0.25f * GlobalScaler.Instance().GetGlobalScale()), Quaternion.identity, structure)) {
 					for (int j = 0; j < lumCount; j++) {
-						if (Physics.CheckBox (new Vector3 ((spacing * Mathf.Floor (j / 2f) + (swarm.roadLength % spacing) / 2f) * scaler.GlobalScale, 0, roadWidth * Mathf.Abs (Mathf.Sin (Mathf.Deg2Rad * 90 * j)) * scaler.GlobalScale), new Vector3 (0.25f * scaler.GlobalScale, 2f * scaler.GlobalScale, 0.25f * scaler.GlobalScale), Quaternion.identity, structure)) {
-							Collider[] str = Physics.OverlapBox (new Vector3 ((spacing * Mathf.Floor (j / 2f) + (swarm.roadLength % spacing) / 2f) * scaler.GlobalScale, 0, roadWidth * Mathf.Abs (Mathf.Sin (Mathf.Deg2Rad * 90 * j)) * scaler.GlobalScale), new Vector3 (0.25f * scaler.GlobalScale, 2f * scaler.GlobalScale, 0.25f * scaler.GlobalScale), Quaternion.identity, structure);
-							Poffsets [j] = (str [0].transform.position.x + str [0].transform.lossyScale.x / 2f) / scaler.GlobalScale - (spacing * Mathf.Floor (j / 2f) + (swarm.roadLength % spacing) / 2f) + 0.5f;
-							Noffsets [j] = ((str [0].transform.position.x - str [0].transform.lossyScale.x / 2f) / scaler.GlobalScale - (spacing * Mathf.Floor (j / 2f) + (swarm.roadLength % spacing) / 2f)) - 0.5f;
+						if (Physics.CheckBox (new Vector3 ((spacing * Mathf.Floor (j / 2f) + (swarm.roadLength % spacing) / 2f) * GlobalScaler.Instance().GetGlobalScale(), 0, roadWidth * Mathf.Abs (Mathf.Sin (Mathf.Deg2Rad * 90 * j)) * GlobalScaler.Instance().GetGlobalScale()), new Vector3 (0.25f * GlobalScaler.Instance().GetGlobalScale(), 2f * GlobalScaler.Instance().GetGlobalScale(), 0.25f * GlobalScaler.Instance().GetGlobalScale()), Quaternion.identity, structure)) {
+							Collider[] str = Physics.OverlapBox (new Vector3 ((spacing * Mathf.Floor (j / 2f) + (swarm.roadLength % spacing) / 2f) * GlobalScaler.Instance().GetGlobalScale(), 0, roadWidth * Mathf.Abs (Mathf.Sin (Mathf.Deg2Rad * 90 * j)) * GlobalScaler.Instance().GetGlobalScale()), new Vector3 (0.25f * GlobalScaler.Instance().GetGlobalScale(), 2f * GlobalScaler.Instance().GetGlobalScale(), 0.25f * GlobalScaler.Instance().GetGlobalScale()), Quaternion.identity, structure);
+							Poffsets [j] = (str [0].transform.position.x + str [0].transform.lossyScale.x / 2f) / GlobalScaler.Instance().GetGlobalScale() - (spacing * Mathf.Floor (j / 2f) + (swarm.roadLength % spacing) / 2f) + 0.5f;
+							Noffsets [j] = ((str [0].transform.position.x - str [0].transform.lossyScale.x / 2f) / GlobalScaler.Instance().GetGlobalScale() - (spacing * Mathf.Floor (j / 2f) + (swarm.roadLength % spacing) / 2f)) - 0.5f;
 							buildable = false;
 						} else {
 							Poffsets [j] = 0;
@@ -245,7 +243,7 @@ public class LightCalculator : MonoBehaviour
 				float tempSpacing = (spacing * (lumCount - 1f) + (swarm.roadLength % spacing) / 2f + Mathf.Max (OPoffsets) - swarm.roadLength - 0.5f) / (lumCount - 1f);
 				if (tempSpacing <= innerdSpaceLim)
 				for (int x = 0; x < lumCount; x++) {
-					if (Physics.CheckBox (new Vector3 ((spacing + tempSpacing) * x + (swarm.roadLength % (spacing + tempSpacing)) / 2f + Mathf.Max (OPoffsets) - tempSpacing * System.Array.IndexOf (OPoffsets, Mathf.Max (OPoffsets)) + tempSpacing / 2f * (lumCount - 1f), 0, roadWidth * Mathf.Abs (Mathf.Sin (Mathf.Deg2Rad * 90 * x)) * scaler.GlobalScale), new Vector3 (0.25f * scaler.GlobalScale, 2f * scaler.GlobalScale, 0.25f * scaler.GlobalScale), Quaternion.identity, structure)) {
+					if (Physics.CheckBox (new Vector3 ((spacing + tempSpacing) * x + (swarm.roadLength % (spacing + tempSpacing)) / 2f + Mathf.Max (OPoffsets) - tempSpacing * System.Array.IndexOf (OPoffsets, Mathf.Max (OPoffsets)) + tempSpacing / 2f * (lumCount - 1f), 0, roadWidth * Mathf.Abs (Mathf.Sin (Mathf.Deg2Rad * 90 * x)) * GlobalScaler.Instance().GetGlobalScale()), new Vector3 (0.25f * GlobalScaler.Instance().GetGlobalScale(), 2f * GlobalScaler.Instance().GetGlobalScale(), 0.25f * GlobalScaler.Instance().GetGlobalScale()), Quaternion.identity, structure)) {
 						buildable = false;
 						break;
 					}
@@ -258,7 +256,7 @@ public class LightCalculator : MonoBehaviour
 					}
 			else {
 				for (int x = 0; x < lumCount; x++) {
-					if (Physics.CheckBox (new Vector3 ((spacing * x + (swarm.roadLength % spacing) / 2f + Mathf.Max (OPoffsets)) * scaler.GlobalScale, 0, roadWidth * Mathf.Abs (Mathf.Sin (Mathf.Deg2Rad * 90 * x)) * scaler.GlobalScale), new Vector3 (0.25f * scaler.GlobalScale, 2f * scaler.GlobalScale, 0.25f * scaler.GlobalScale), Quaternion.identity, structure))
+					if (Physics.CheckBox (new Vector3 ((spacing * x + (swarm.roadLength % spacing) / 2f + Mathf.Max (OPoffsets)) * GlobalScaler.Instance().GetGlobalScale(), 0, roadWidth * Mathf.Abs (Mathf.Sin (Mathf.Deg2Rad * 90 * x)) * GlobalScaler.Instance().GetGlobalScale()), new Vector3 (0.25f * GlobalScaler.Instance().GetGlobalScale(), 2f * GlobalScaler.Instance().GetGlobalScale(), 0.25f * GlobalScaler.Instance().GetGlobalScale()), Quaternion.identity, structure))
 						buildable = false;
 				}			
 				if (buildable) {
@@ -271,7 +269,7 @@ public class LightCalculator : MonoBehaviour
 					float tempSpacing = ((swarm.roadLength % spacing) / 2f + Mathf.Min (ONoffsets) + 0.5f) / (lumCount - 1f);
 					if (tempSpacing <= innerdSpaceLim)
 					for (int x = 0; x < lumCount; x++) {
-						if (Physics.CheckBox (new Vector3 ((spacing + tempSpacing) * x + (swarm.roadLength % (spacing + tempSpacing)) / 2f + Mathf.Min (ONoffsets) - tempSpacing * System.Array.IndexOf (ONoffsets, Mathf.Min (ONoffsets)) + tempSpacing / 2f * (lumCount - 1f), 0, roadWidth * Mathf.Abs (Mathf.Sin (Mathf.Deg2Rad * 90 * x)) * scaler.GlobalScale), new Vector3 (0.25f * scaler.GlobalScale, 2f * scaler.GlobalScale, 0.25f * scaler.GlobalScale), Quaternion.identity, structure)) {
+						if (Physics.CheckBox (new Vector3 ((spacing + tempSpacing) * x + (swarm.roadLength % (spacing + tempSpacing)) / 2f + Mathf.Min (ONoffsets) - tempSpacing * System.Array.IndexOf (ONoffsets, Mathf.Min (ONoffsets)) + tempSpacing / 2f * (lumCount - 1f), 0, roadWidth * Mathf.Abs (Mathf.Sin (Mathf.Deg2Rad * 90 * x)) * GlobalScaler.Instance().GetGlobalScale()), new Vector3 (0.25f * GlobalScaler.Instance().GetGlobalScale(), 2f * GlobalScaler.Instance().GetGlobalScale(), 0.25f * GlobalScaler.Instance().GetGlobalScale()), Quaternion.identity, structure)) {
 							buildable = false;
 							break;
 						}
@@ -284,7 +282,7 @@ public class LightCalculator : MonoBehaviour
 				}
 				else {
 					for (int x = 0; x < lumCount; x++) {
-						if (Physics.CheckBox (new Vector3 ((spacing * x + (swarm.roadLength % spacing) / 2f + Mathf.Min (ONoffsets)) * scaler.GlobalScale, 0, roadWidth * Mathf.Abs (Mathf.Sin (Mathf.Deg2Rad * 90 * x)) * scaler.GlobalScale), new Vector3 (0.25f * scaler.GlobalScale, 2f * scaler.GlobalScale, 0.25f * scaler.GlobalScale), Quaternion.identity, structure))
+						if (Physics.CheckBox (new Vector3 ((spacing * x + (swarm.roadLength % spacing) / 2f + Mathf.Min (ONoffsets)) * GlobalScaler.Instance().GetGlobalScale(), 0, roadWidth * Mathf.Abs (Mathf.Sin (Mathf.Deg2Rad * 90 * x)) * GlobalScaler.Instance().GetGlobalScale()), new Vector3 (0.25f * GlobalScaler.Instance().GetGlobalScale(), 2f * GlobalScaler.Instance().GetGlobalScale(), 0.25f * GlobalScaler.Instance().GetGlobalScale()), Quaternion.identity, structure))
 							buildable = false;
 					}			
 					if (buildable) {
@@ -297,7 +295,7 @@ public class LightCalculator : MonoBehaviour
 						float tempSpacing = (spacing * (lumCount - 1f) + (swarm.roadLength % spacing) / 2f + Mathf.Max (RPoffsets) - swarm.roadLength - 0.5f) / (lumCount - 1f);
 						if (tempSpacing <= innerdSpaceLim)
 							for (int x = 0; x < lumCount; x++) {
-								if (Physics.CheckBox (new Vector3 ((spacing + tempSpacing) * x + (swarm.roadLength % (spacing + tempSpacing)) / 2f + Mathf.Max (RPoffsets) - tempSpacing * System.Array.IndexOf (RPoffsets, Mathf.Max (RPoffsets)) + tempSpacing / 2f * (lumCount - 1f), 0, roadWidth * Mathf.Abs (Mathf.Cos (Mathf.Deg2Rad * 90 * x)) * scaler.GlobalScale), new Vector3 (0.25f * scaler.GlobalScale, 2f * scaler.GlobalScale, 0.25f * scaler.GlobalScale), Quaternion.identity, structure)) {
+								if (Physics.CheckBox (new Vector3 ((spacing + tempSpacing) * x + (swarm.roadLength % (spacing + tempSpacing)) / 2f + Mathf.Max (RPoffsets) - tempSpacing * System.Array.IndexOf (RPoffsets, Mathf.Max (RPoffsets)) + tempSpacing / 2f * (lumCount - 1f), 0, roadWidth * Mathf.Abs (Mathf.Cos (Mathf.Deg2Rad * 90 * x)) * GlobalScaler.Instance().GetGlobalScale()), new Vector3 (0.25f * GlobalScaler.Instance().GetGlobalScale(), 2f * GlobalScaler.Instance().GetGlobalScale(), 0.25f * GlobalScaler.Instance().GetGlobalScale()), Quaternion.identity, structure)) {
 									buildable = false;
 									break;
 								}
@@ -310,7 +308,7 @@ public class LightCalculator : MonoBehaviour
 					}
 					else {
 						for (int x = 0; x < lumCount; x++) {
-							if (Physics.CheckBox (new Vector3 ((spacing * x + (swarm.roadLength % spacing) / 2f + Mathf.Max (RPoffsets)) * scaler.GlobalScale, 0, roadWidth * Mathf.Abs (Mathf.Cos (Mathf.Deg2Rad * 90 * x)) * scaler.GlobalScale), new Vector3 (0.25f * scaler.GlobalScale, 2f * scaler.GlobalScale, 0.25f * scaler.GlobalScale), Quaternion.identity, structure))
+							if (Physics.CheckBox (new Vector3 ((spacing * x + (swarm.roadLength % spacing) / 2f + Mathf.Max (RPoffsets)) * GlobalScaler.Instance().GetGlobalScale(), 0, roadWidth * Mathf.Abs (Mathf.Cos (Mathf.Deg2Rad * 90 * x)) * GlobalScaler.Instance().GetGlobalScale()), new Vector3 (0.25f * GlobalScaler.Instance().GetGlobalScale(), 2f * GlobalScaler.Instance().GetGlobalScale(), 0.25f * GlobalScaler.Instance().GetGlobalScale()), Quaternion.identity, structure))
 								buildable = false;
 						}			
 						if (buildable) {
@@ -324,7 +322,7 @@ public class LightCalculator : MonoBehaviour
 							float tempSpacing = ((swarm.roadLength % spacing) / 2f + Mathf.Min (RNoffsets) + 0.5f) / (lumCount - 1f);
 							if (tempSpacing <= innerdSpaceLim)
 								for (int x = 0; x < lumCount; x++) {
-									if (Physics.CheckBox (new Vector3 ((spacing + tempSpacing) * x + (swarm.roadLength % (spacing + tempSpacing)) / 2f + Mathf.Min (RNoffsets) - tempSpacing * System.Array.IndexOf (RNoffsets, Mathf.Min (RNoffsets)) + tempSpacing / 2f * (lumCount - 1f), 0, roadWidth * Mathf.Abs (Mathf.Cos (Mathf.Deg2Rad * 90 * x)) * scaler.GlobalScale), new Vector3 (0.25f * scaler.GlobalScale, 2f * scaler.GlobalScale, 0.25f * scaler.GlobalScale), Quaternion.identity, structure)) {
+									if (Physics.CheckBox (new Vector3 ((spacing + tempSpacing) * x + (swarm.roadLength % (spacing + tempSpacing)) / 2f + Mathf.Min (RNoffsets) - tempSpacing * System.Array.IndexOf (RNoffsets, Mathf.Min (RNoffsets)) + tempSpacing / 2f * (lumCount - 1f), 0, roadWidth * Mathf.Abs (Mathf.Cos (Mathf.Deg2Rad * 90 * x)) * GlobalScaler.Instance().GetGlobalScale()), new Vector3 (0.25f * GlobalScaler.Instance().GetGlobalScale(), 2f * GlobalScaler.Instance().GetGlobalScale(), 0.25f * GlobalScaler.Instance().GetGlobalScale()), Quaternion.identity, structure)) {
 										buildable = false;
 										break;
 									}
@@ -337,7 +335,7 @@ public class LightCalculator : MonoBehaviour
 						}
 						else {
 							for (int x = 0; x < lumCount; x++) {
-								if (Physics.CheckBox (new Vector3 ((spacing * x + (swarm.roadLength % spacing) / 2f + Mathf.Min (RNoffsets)) * scaler.GlobalScale, 0, roadWidth * Mathf.Abs (Mathf.Cos (Mathf.Deg2Rad * 90 * x)) * scaler.GlobalScale), new Vector3 (0.25f * scaler.GlobalScale, 2f * scaler.GlobalScale, 0.25f * scaler.GlobalScale), Quaternion.identity, structure))
+								if (Physics.CheckBox (new Vector3 ((spacing * x + (swarm.roadLength % spacing) / 2f + Mathf.Min (RNoffsets)) * GlobalScaler.Instance().GetGlobalScale(), 0, roadWidth * Mathf.Abs (Mathf.Cos (Mathf.Deg2Rad * 90 * x)) * GlobalScaler.Instance().GetGlobalScale()), new Vector3 (0.25f * GlobalScaler.Instance().GetGlobalScale(), 2f * GlobalScaler.Instance().GetGlobalScale(), 0.25f * GlobalScaler.Instance().GetGlobalScale()), Quaternion.identity, structure))
 									buildable = false;
 							}			
 							if (buildable) {
@@ -358,7 +356,7 @@ public class LightCalculator : MonoBehaviour
 				float tempSpacing = (spacing * (lumCount - 1f) + (swarm.roadLength % spacing) / 2f + Mathf.Max (OPoffsets) - swarm.roadLength - 0.5f) / (lumCount - 1f);
 				if (tempSpacing <= innerdSpaceLim)
 					for (int x = 0; x < lumCount; x++) {
-						if (Physics.CheckBox (new Vector3 ((spacing + tempSpacing) * x + (swarm.roadLength % (spacing + tempSpacing)) / 2f + Mathf.Max (OPoffsets) - tempSpacing * System.Array.IndexOf (OPoffsets, Mathf.Max (OPoffsets)) + tempSpacing / 2f * (lumCount - 1f), 0, roadWidth * Mathf.Abs (Mathf.Sin (Mathf.Deg2Rad * 90 * x)) * scaler.GlobalScale), new Vector3 (0.25f * scaler.GlobalScale, 2f * scaler.GlobalScale, 0.25f * scaler.GlobalScale), Quaternion.identity, structure)) {
+						if (Physics.CheckBox (new Vector3 ((spacing + tempSpacing) * x + (swarm.roadLength % (spacing + tempSpacing)) / 2f + Mathf.Max (OPoffsets) - tempSpacing * System.Array.IndexOf (OPoffsets, Mathf.Max (OPoffsets)) + tempSpacing / 2f * (lumCount - 1f), 0, roadWidth * Mathf.Abs (Mathf.Sin (Mathf.Deg2Rad * 90 * x)) * GlobalScaler.Instance().GetGlobalScale()), new Vector3 (0.25f * GlobalScaler.Instance().GetGlobalScale(), 2f * GlobalScaler.Instance().GetGlobalScale(), 0.25f * GlobalScaler.Instance().GetGlobalScale()), Quaternion.identity, structure)) {
 							buildable = false;
 							break;
 						}
@@ -371,7 +369,7 @@ public class LightCalculator : MonoBehaviour
 			}
 			else {
 				for (int x = 0; x < lumCount; x++) {
-					if (Physics.CheckBox (new Vector3 ((spacing * x + (swarm.roadLength % spacing) / 2f + Mathf.Max (OPoffsets)) * scaler.GlobalScale, 0, 0), new Vector3 (0.25f * scaler.GlobalScale, 2f * scaler.GlobalScale, 0.25f * scaler.GlobalScale), Quaternion.identity, structure))
+					if (Physics.CheckBox (new Vector3 ((spacing * x + (swarm.roadLength % spacing) / 2f + Mathf.Max (OPoffsets)) * GlobalScaler.Instance().GetGlobalScale(), 0, 0), new Vector3 (0.25f * GlobalScaler.Instance().GetGlobalScale(), 2f * GlobalScaler.Instance().GetGlobalScale(), 0.25f * GlobalScaler.Instance().GetGlobalScale()), Quaternion.identity, structure))
 						buildable = false;
 				}			
 				if (buildable) {
@@ -384,7 +382,7 @@ public class LightCalculator : MonoBehaviour
 					float tempSpacing = ((swarm.roadLength % spacing) / 2f + Mathf.Min (ONoffsets) + 0.5f) / (lumCount - 1f);
 					if (tempSpacing <= innerdSpaceLim)
 						for (int x = 0; x < lumCount; x++) {
-							if (Physics.CheckBox (new Vector3 ((spacing + tempSpacing) * x + (swarm.roadLength % (spacing + tempSpacing)) / 2f + Mathf.Min (ONoffsets) - tempSpacing * System.Array.IndexOf (ONoffsets, Mathf.Min (ONoffsets)) + tempSpacing / 2f * (lumCount - 1f), 0, roadWidth * Mathf.Abs (Mathf.Sin (Mathf.Deg2Rad * 90 * x)) * scaler.GlobalScale), new Vector3 (0.25f * scaler.GlobalScale, 2f * scaler.GlobalScale, 0.25f * scaler.GlobalScale), Quaternion.identity, structure)) {
+							if (Physics.CheckBox (new Vector3 ((spacing + tempSpacing) * x + (swarm.roadLength % (spacing + tempSpacing)) / 2f + Mathf.Min (ONoffsets) - tempSpacing * System.Array.IndexOf (ONoffsets, Mathf.Min (ONoffsets)) + tempSpacing / 2f * (lumCount - 1f), 0, roadWidth * Mathf.Abs (Mathf.Sin (Mathf.Deg2Rad * 90 * x)) * GlobalScaler.Instance().GetGlobalScale()), new Vector3 (0.25f * GlobalScaler.Instance().GetGlobalScale(), 2f * GlobalScaler.Instance().GetGlobalScale(), 0.25f * GlobalScaler.Instance().GetGlobalScale()), Quaternion.identity, structure)) {
 								buildable = false;
 								break;
 							}
@@ -397,7 +395,7 @@ public class LightCalculator : MonoBehaviour
 				}
 				else {
 					for (int x = 0; x < lumCount; x++) {
-						if (Physics.CheckBox (new Vector3 ((spacing * x + (swarm.roadLength % spacing) / 2f + Mathf.Min (ONoffsets)) * scaler.GlobalScale, 0, 0), new Vector3 (0.25f * scaler.GlobalScale, 2f * scaler.GlobalScale, 0.25f * scaler.GlobalScale), Quaternion.identity, structure))
+						if (Physics.CheckBox (new Vector3 ((spacing * x + (swarm.roadLength % spacing) / 2f + Mathf.Min (ONoffsets)) * GlobalScaler.Instance().GetGlobalScale(), 0, 0), new Vector3 (0.25f * GlobalScaler.Instance().GetGlobalScale(), 2f * GlobalScaler.Instance().GetGlobalScale(), 0.25f * GlobalScaler.Instance().GetGlobalScale()), Quaternion.identity, structure))
 							buildable = false;
 					}			
 					if (buildable) {
@@ -410,7 +408,7 @@ public class LightCalculator : MonoBehaviour
 						float tempSpacing = (spacing * (lumCount - 1f) + (swarm.roadLength % spacing) / 2f + Mathf.Max (RPoffsets) - swarm.roadLength - 0.5f) / (lumCount - 1f);
 						if (tempSpacing <= innerdSpaceLim)
 							for (int x = 0; x < lumCount; x++) {
-								if (Physics.CheckBox (new Vector3 ((spacing + tempSpacing) * x + (swarm.roadLength % (spacing + tempSpacing)) / 2f + Mathf.Max (RPoffsets) - tempSpacing * System.Array.IndexOf (RPoffsets, Mathf.Max (RPoffsets)) + tempSpacing / 2f * (lumCount - 1f), 0, roadWidth * Mathf.Abs (Mathf.Cos (Mathf.Deg2Rad * 90 * x)) * scaler.GlobalScale), new Vector3 (0.25f * scaler.GlobalScale, 2f * scaler.GlobalScale, 0.25f * scaler.GlobalScale), Quaternion.identity, structure)) {
+								if (Physics.CheckBox (new Vector3 ((spacing + tempSpacing) * x + (swarm.roadLength % (spacing + tempSpacing)) / 2f + Mathf.Max (RPoffsets) - tempSpacing * System.Array.IndexOf (RPoffsets, Mathf.Max (RPoffsets)) + tempSpacing / 2f * (lumCount - 1f), 0, roadWidth * Mathf.Abs (Mathf.Cos (Mathf.Deg2Rad * 90 * x)) * GlobalScaler.Instance().GetGlobalScale()), new Vector3 (0.25f * GlobalScaler.Instance().GetGlobalScale(), 2f * GlobalScaler.Instance().GetGlobalScale(), 0.25f * GlobalScaler.Instance().GetGlobalScale()), Quaternion.identity, structure)) {
 									buildable = false;
 									break;
 								}
@@ -423,7 +421,7 @@ public class LightCalculator : MonoBehaviour
 					}
 					else {
 						for (int x = 0; x < lumCount; x++) {
-							if (Physics.CheckBox (new Vector3 ((spacing * x + (swarm.roadLength % spacing) / 2f + Mathf.Max (RPoffsets)) * scaler.GlobalScale, 0, roadWidth * scaler.GlobalScale), new Vector3 (0.25f * scaler.GlobalScale, 2f * scaler.GlobalScale, 0.25f * scaler.GlobalScale), Quaternion.identity, structure))
+							if (Physics.CheckBox (new Vector3 ((spacing * x + (swarm.roadLength % spacing) / 2f + Mathf.Max (RPoffsets)) * GlobalScaler.Instance().GetGlobalScale(), 0, roadWidth * GlobalScaler.Instance().GetGlobalScale()), new Vector3 (0.25f * GlobalScaler.Instance().GetGlobalScale(), 2f * GlobalScaler.Instance().GetGlobalScale(), 0.25f * GlobalScaler.Instance().GetGlobalScale()), Quaternion.identity, structure))
 								buildable = false;
 						}			
 						if (buildable) {
@@ -437,7 +435,7 @@ public class LightCalculator : MonoBehaviour
 							float tempSpacing = ((swarm.roadLength % spacing) / 2f + Mathf.Min (RNoffsets) + 0.5f) / (lumCount - 1f);
 							if (tempSpacing <= innerdSpaceLim)
 								for (int x = 0; x < lumCount; x++) {
-									if (Physics.CheckBox (new Vector3 ((spacing + tempSpacing) * x + (swarm.roadLength % (spacing + tempSpacing)) / 2f + Mathf.Min (RNoffsets) - tempSpacing * System.Array.IndexOf (RNoffsets, Mathf.Min (RNoffsets)) + tempSpacing / 2f * (lumCount - 1f), 0, roadWidth * Mathf.Abs (Mathf.Cos (Mathf.Deg2Rad * 90 * x)) * scaler.GlobalScale), new Vector3 (0.25f * scaler.GlobalScale, 2f * scaler.GlobalScale, 0.25f * scaler.GlobalScale), Quaternion.identity, structure)) {
+									if (Physics.CheckBox (new Vector3 ((spacing + tempSpacing) * x + (swarm.roadLength % (spacing + tempSpacing)) / 2f + Mathf.Min (RNoffsets) - tempSpacing * System.Array.IndexOf (RNoffsets, Mathf.Min (RNoffsets)) + tempSpacing / 2f * (lumCount - 1f), 0, roadWidth * Mathf.Abs (Mathf.Cos (Mathf.Deg2Rad * 90 * x)) * GlobalScaler.Instance().GetGlobalScale()), new Vector3 (0.25f * GlobalScaler.Instance().GetGlobalScale(), 2f * GlobalScaler.Instance().GetGlobalScale(), 0.25f * GlobalScaler.Instance().GetGlobalScale()), Quaternion.identity, structure)) {
 										buildable = false;
 										break;
 									}
@@ -450,7 +448,7 @@ public class LightCalculator : MonoBehaviour
 						}
 						else {
 							for (int x = 0; x < lumCount; x++) {
-								if (Physics.CheckBox (new Vector3 ((spacing * x + (swarm.roadLength % spacing) / 2f + Mathf.Min (RNoffsets)) * scaler.GlobalScale, 0, roadWidth * scaler.GlobalScale), new Vector3 (0.25f * scaler.GlobalScale, 2f * scaler.GlobalScale, 0.25f * scaler.GlobalScale), Quaternion.identity, structure))
+								if (Physics.CheckBox (new Vector3 ((spacing * x + (swarm.roadLength % spacing) / 2f + Mathf.Min (RNoffsets)) * GlobalScaler.Instance().GetGlobalScale(), 0, roadWidth * GlobalScaler.Instance().GetGlobalScale()), new Vector3 (0.25f * GlobalScaler.Instance().GetGlobalScale(), 2f * GlobalScaler.Instance().GetGlobalScale(), 0.25f * GlobalScaler.Instance().GetGlobalScale()), Quaternion.identity, structure))
 									buildable = false;
 							}			
 							if (buildable) {
@@ -472,7 +470,7 @@ public class LightCalculator : MonoBehaviour
 					float tempSpacing = (spacing * (Mathf.Floor(lumCount / 2f) - 1f) + (swarm.roadLength % spacing) / 2f + Mathf.Max (Poffsets) - swarm.roadLength - 0.5f) / (Mathf.Floor(lumCount / 2f) - 1f);
 					if (tempSpacing <= innerdSpaceLim)
 						for (int x = 0; x < lumCount; x++) {
-							if (Physics.CheckBox (new Vector3 ((spacing + tempSpacing) * Mathf.Floor (x / 2f) + (swarm.roadLength % (spacing + tempSpacing)) / 2f + Mathf.Max (Poffsets) - tempSpacing * Mathf.Floor(System.Array.IndexOf (Poffsets, Mathf.Max (Poffsets)) / 2f) + tempSpacing / 2f * ((float)Mathf.Floor(lumCount / 2f) - 1f), 0, roadWidth * Mathf.Abs (Mathf.Sin (Mathf.Deg2Rad * 90 * x)) * scaler.GlobalScale), new Vector3 (0.25f * scaler.GlobalScale, 2f * scaler.GlobalScale, 0.25f * scaler.GlobalScale), Quaternion.identity, structure)) {
+							if (Physics.CheckBox (new Vector3 ((spacing + tempSpacing) * Mathf.Floor (x / 2f) + (swarm.roadLength % (spacing + tempSpacing)) / 2f + Mathf.Max (Poffsets) - tempSpacing * Mathf.Floor(System.Array.IndexOf (Poffsets, Mathf.Max (Poffsets)) / 2f) + tempSpacing / 2f * ((float)Mathf.Floor(lumCount / 2f) - 1f), 0, roadWidth * Mathf.Abs (Mathf.Sin (Mathf.Deg2Rad * 90 * x)) * GlobalScaler.Instance().GetGlobalScale()), new Vector3 (0.25f * GlobalScaler.Instance().GetGlobalScale(), 2f * GlobalScaler.Instance().GetGlobalScale(), 0.25f * GlobalScaler.Instance().GetGlobalScale()), Quaternion.identity, structure)) {
 								buildable = false;
 								break;
 							}
@@ -485,7 +483,7 @@ public class LightCalculator : MonoBehaviour
 				}
 				else {
 						for (int x = 0; x < lumCount; x++) {
-							if (Physics.CheckBox (new Vector3 ((spacing * Mathf.Floor (x / 2f) + (swarm.roadLength % spacing) / 2f + Mathf.Max (Poffsets)) * scaler.GlobalScale, 0, roadWidth * Mathf.Abs (Mathf.Sin (Mathf.Deg2Rad * 90 * x)) * scaler.GlobalScale), new Vector3 (0.25f * scaler.GlobalScale, 2f * scaler.GlobalScale, 0.25f * scaler.GlobalScale), Quaternion.identity, structure))
+							if (Physics.CheckBox (new Vector3 ((spacing * Mathf.Floor (x / 2f) + (swarm.roadLength % spacing) / 2f + Mathf.Max (Poffsets)) * GlobalScaler.Instance().GetGlobalScale(), 0, roadWidth * Mathf.Abs (Mathf.Sin (Mathf.Deg2Rad * 90 * x)) * GlobalScaler.Instance().GetGlobalScale()), new Vector3 (0.25f * GlobalScaler.Instance().GetGlobalScale(), 2f * GlobalScaler.Instance().GetGlobalScale(), 0.25f * GlobalScaler.Instance().GetGlobalScale()), Quaternion.identity, structure))
 								buildable = false;
 						}			
 						if (buildable) {
@@ -498,7 +496,7 @@ public class LightCalculator : MonoBehaviour
 						float tempSpacing = ((swarm.roadLength % spacing) / 2f + Mathf.Min (Noffsets) + 0.5f) / (Mathf.Floor(lumCount / 2f) - 1f);
 						if (tempSpacing <= innerdSpaceLim)
 							for (int x = 0; x < lumCount; x++) {
-								if (Physics.CheckBox (new Vector3 ((spacing + tempSpacing) * Mathf.Floor (x / 2f) + (swarm.roadLength % (spacing + tempSpacing)) / 2f + Mathf.Min (Noffsets) - tempSpacing * Mathf.Floor(System.Array.IndexOf (Noffsets, Mathf.Min (Noffsets)) / 2f) + tempSpacing / 2f * ((float)Mathf.Floor(lumCount / 2f) - 1f), 0, roadWidth * Mathf.Abs (Mathf.Sin (Mathf.Deg2Rad * 90 * x)) * scaler.GlobalScale), new Vector3 (0.25f * scaler.GlobalScale, 2f * scaler.GlobalScale, 0.25f * scaler.GlobalScale), Quaternion.identity, structure)) {
+								if (Physics.CheckBox (new Vector3 ((spacing + tempSpacing) * Mathf.Floor (x / 2f) + (swarm.roadLength % (spacing + tempSpacing)) / 2f + Mathf.Min (Noffsets) - tempSpacing * Mathf.Floor(System.Array.IndexOf (Noffsets, Mathf.Min (Noffsets)) / 2f) + tempSpacing / 2f * ((float)Mathf.Floor(lumCount / 2f) - 1f), 0, roadWidth * Mathf.Abs (Mathf.Sin (Mathf.Deg2Rad * 90 * x)) * GlobalScaler.Instance().GetGlobalScale()), new Vector3 (0.25f * GlobalScaler.Instance().GetGlobalScale(), 2f * GlobalScaler.Instance().GetGlobalScale(), 0.25f * GlobalScaler.Instance().GetGlobalScale()), Quaternion.identity, structure)) {
 									buildable = false;
 									break;
 								}
@@ -511,7 +509,7 @@ public class LightCalculator : MonoBehaviour
 					}
 					else {
 							for (int x = 0; x < lumCount; x++) {
-								if (Physics.CheckBox (new Vector3 ((spacing * Mathf.Floor (x / 2f) + (swarm.roadLength % spacing) / 2f + Mathf.Min (Noffsets)) * scaler.GlobalScale, 0, roadWidth * Mathf.Abs (Mathf.Sin (Mathf.Deg2Rad * 90 * x)) * scaler.GlobalScale), new Vector3 (0.25f * scaler.GlobalScale, 2f * scaler.GlobalScale, 0.25f * scaler.GlobalScale), Quaternion.identity, structure))
+								if (Physics.CheckBox (new Vector3 ((spacing * Mathf.Floor (x / 2f) + (swarm.roadLength % spacing) / 2f + Mathf.Min (Noffsets)) * GlobalScaler.Instance().GetGlobalScale(), 0, roadWidth * Mathf.Abs (Mathf.Sin (Mathf.Deg2Rad * 90 * x)) * GlobalScaler.Instance().GetGlobalScale()), new Vector3 (0.25f * GlobalScaler.Instance().GetGlobalScale(), 2f * GlobalScaler.Instance().GetGlobalScale(), 0.25f * GlobalScaler.Instance().GetGlobalScale()), Quaternion.identity, structure))
 									buildable = false;
 							}
 							if (buildable) {
@@ -526,7 +524,7 @@ public class LightCalculator : MonoBehaviour
 					float tempSpacing = ((swarm.roadLength % spacing) / 2f + Mathf.Min (Noffsets) + 0.5f) / (Mathf.Floor(lumCount / 2f) - 1f);
 					if (tempSpacing <= innerdSpaceLim)
 						for (int x = 0; x < lumCount; x++) {
-							if (Physics.CheckBox (new Vector3 ((spacing + tempSpacing) * Mathf.Floor (x / 2f) + (swarm.roadLength % (spacing + tempSpacing)) / 2f + Mathf.Min (Noffsets) - tempSpacing * Mathf.Floor(System.Array.IndexOf (Noffsets, Mathf.Min (Noffsets)) / 2f) + tempSpacing / 2f * ((float)Mathf.Floor(lumCount / 2f) - 1f), 0, roadWidth * Mathf.Abs (Mathf.Sin (Mathf.Deg2Rad * 90 * x)) * scaler.GlobalScale), new Vector3 (0.25f * scaler.GlobalScale, 2f * scaler.GlobalScale, 0.25f * scaler.GlobalScale), Quaternion.identity, structure)) {
+							if (Physics.CheckBox (new Vector3 ((spacing + tempSpacing) * Mathf.Floor (x / 2f) + (swarm.roadLength % (spacing + tempSpacing)) / 2f + Mathf.Min (Noffsets) - tempSpacing * Mathf.Floor(System.Array.IndexOf (Noffsets, Mathf.Min (Noffsets)) / 2f) + tempSpacing / 2f * ((float)Mathf.Floor(lumCount / 2f) - 1f), 0, roadWidth * Mathf.Abs (Mathf.Sin (Mathf.Deg2Rad * 90 * x)) * GlobalScaler.Instance().GetGlobalScale()), new Vector3 (0.25f * GlobalScaler.Instance().GetGlobalScale(), 2f * GlobalScaler.Instance().GetGlobalScale(), 0.25f * GlobalScaler.Instance().GetGlobalScale()), Quaternion.identity, structure)) {
 								buildable = false;
 								break;
 							}
@@ -539,7 +537,7 @@ public class LightCalculator : MonoBehaviour
 				}
 				else {
 						for (int x = 0; x < lumCount; x++) {
-							if (Physics.CheckBox (new Vector3 ((spacing * Mathf.Floor (x / 2f) + (swarm.roadLength % spacing) / 2f + Mathf.Min (Noffsets)) * scaler.GlobalScale, 0, roadWidth * Mathf.Abs (Mathf.Sin (Mathf.Deg2Rad * 90 * x)) * scaler.GlobalScale), new Vector3 (0.25f * scaler.GlobalScale, 2f * scaler.GlobalScale, 0.25f * scaler.GlobalScale), Quaternion.identity, structure))
+							if (Physics.CheckBox (new Vector3 ((spacing * Mathf.Floor (x / 2f) + (swarm.roadLength % spacing) / 2f + Mathf.Min (Noffsets)) * GlobalScaler.Instance().GetGlobalScale(), 0, roadWidth * Mathf.Abs (Mathf.Sin (Mathf.Deg2Rad * 90 * x)) * GlobalScaler.Instance().GetGlobalScale()), new Vector3 (0.25f * GlobalScaler.Instance().GetGlobalScale(), 2f * GlobalScaler.Instance().GetGlobalScale(), 0.25f * GlobalScaler.Instance().GetGlobalScale()), Quaternion.identity, structure))
 								buildable = false;
 						}
 						if (buildable) {
@@ -552,7 +550,7 @@ public class LightCalculator : MonoBehaviour
 						float tempSpacing = (spacing * (Mathf.Floor(lumCount / 2f) - 1f) + (swarm.roadLength % spacing) / 2f + Mathf.Max (Poffsets) - swarm.roadLength - 0.5f) / (Mathf.Floor(lumCount / 2f) - 1f);
 						if (tempSpacing <= innerdSpaceLim)
 							for (int x = 0; x < lumCount; x++) {
-								if (Physics.CheckBox (new Vector3 ((spacing + tempSpacing) * Mathf.Floor (x / 2f) + (swarm.roadLength % (spacing + tempSpacing)) / 2f + Mathf.Max (Poffsets) - tempSpacing * Mathf.Floor(System.Array.IndexOf (Poffsets, Mathf.Max (Poffsets)) / 2f) + tempSpacing / 2f * ((float)Mathf.Floor(lumCount / 2f) - 1f), 0, roadWidth * Mathf.Abs (Mathf.Sin (Mathf.Deg2Rad * 90 * x)) * scaler.GlobalScale), new Vector3 (0.25f * scaler.GlobalScale, 2f * scaler.GlobalScale, 0.25f * scaler.GlobalScale), Quaternion.identity, structure)) {
+								if (Physics.CheckBox (new Vector3 ((spacing + tempSpacing) * Mathf.Floor (x / 2f) + (swarm.roadLength % (spacing + tempSpacing)) / 2f + Mathf.Max (Poffsets) - tempSpacing * Mathf.Floor(System.Array.IndexOf (Poffsets, Mathf.Max (Poffsets)) / 2f) + tempSpacing / 2f * ((float)Mathf.Floor(lumCount / 2f) - 1f), 0, roadWidth * Mathf.Abs (Mathf.Sin (Mathf.Deg2Rad * 90 * x)) * GlobalScaler.Instance().GetGlobalScale()), new Vector3 (0.25f * GlobalScaler.Instance().GetGlobalScale(), 2f * GlobalScaler.Instance().GetGlobalScale(), 0.25f * GlobalScaler.Instance().GetGlobalScale()), Quaternion.identity, structure)) {
 									buildable = false;
 									break;
 								}
@@ -565,7 +563,7 @@ public class LightCalculator : MonoBehaviour
 					}
 					else {
 							for (int x = 0; x < lumCount; x++) {
-								if (Physics.CheckBox (new Vector3 ((spacing * Mathf.Floor (x / 2f) + (swarm.roadLength % spacing) / 2f + Mathf.Max (Poffsets)) * scaler.GlobalScale, 0, roadWidth * Mathf.Abs (Mathf.Sin (Mathf.Deg2Rad * 90 * x)) * scaler.GlobalScale), new Vector3 (0.25f * scaler.GlobalScale, 2f * scaler.GlobalScale, 0.25f * scaler.GlobalScale), Quaternion.identity, structure))
+								if (Physics.CheckBox (new Vector3 ((spacing * Mathf.Floor (x / 2f) + (swarm.roadLength % spacing) / 2f + Mathf.Max (Poffsets)) * GlobalScaler.Instance().GetGlobalScale(), 0, roadWidth * Mathf.Abs (Mathf.Sin (Mathf.Deg2Rad * 90 * x)) * GlobalScaler.Instance().GetGlobalScale()), new Vector3 (0.25f * GlobalScaler.Instance().GetGlobalScale(), 2f * GlobalScaler.Instance().GetGlobalScale(), 0.25f * GlobalScaler.Instance().GetGlobalScale()), Quaternion.identity, structure))
 									buildable = false;
 							}			
 							if (buildable) {
@@ -601,8 +599,8 @@ public class LightCalculator : MonoBehaviour
 				else
 					lumY [b] = 0;
 			}
-			GameObject lampPost = Instantiate (luminaire, new Vector3 (lumX[b] * scaler.GlobalScale, (height / 2f - 1f) * scaler.GlobalScale, lumY[b] * scaler.GlobalScale), new Quaternion (0, 0, 0, 0));
-			lampPost.transform.localScale = new Vector3 (.25f * scaler.GlobalScale, height / 2f * scaler.GlobalScale, .25f * scaler.GlobalScale);
+			GameObject lampPost = Instantiate (luminaire, new Vector3 (lumX[b] * GlobalScaler.Instance().GetGlobalScale(), (height / 2f - 1f) * GlobalScaler.Instance().GetGlobalScale(), lumY[b] * GlobalScaler.Instance().GetGlobalScale()), new Quaternion (0, 0, 0, 0));
+			lampPost.transform.localScale = new Vector3 (.25f * GlobalScaler.Instance().GetGlobalScale(), height / 2f * GlobalScaler.Instance().GetGlobalScale(), .25f * GlobalScaler.Instance().GetGlobalScale());
 			lampList [b] = lampPost;
 			for (int a = 0; a < longCalPoints * 3; a++) {
 				C = Mathf.Rad2Deg * Mathf.Atan (Mathf.Abs (swarm.lumPointsY [a] - lumY [b]) / Mathf.Abs (swarm.lumPointsX [a] - lumX[b]));
@@ -641,7 +639,8 @@ public class LightCalculator : MonoBehaviour
 			for (int z = 0; z < 12; z++)
 				for (int sun = 0; sun < monthlyHours [z]; sun++) {
 					int percBlocked = 0;
-					Vector3 sunPos = new Vector3 (Mathf.Sin (Mathf.Deg2Rad * (azimuth [z, sun] - grid.dir)) * Mathf.Cos (Mathf.Deg2Rad * horizonAngle [z, sun]), Mathf.Sin (Mathf.Deg2Rad * horizonAngle [z, sun]), Mathf.Cos (Mathf.Deg2Rad * (azimuth [z, sun] - grid.dir)) * Mathf.Cos (Mathf.Deg2Rad * horizonAngle [z, sun]));
+					//Vector3 sunPos = new Vector3 (Mathf.Sin (Mathf.Deg2Rad * (azimuth [z, sun] - grid.dir)) * Mathf.Cos (Mathf.Deg2Rad * horizonAngle [z, sun]), Mathf.Sin (Mathf.Deg2Rad * horizonAngle [z, sun]), Mathf.Cos (Mathf.Deg2Rad * (azimuth [z, sun] - grid.dir)) * Mathf.Cos (Mathf.Deg2Rad * horizonAngle [z, sun]));
+					Vector3 sunPos = Vector3.zero;
 					if (Physics.BoxCast (lampList [x].transform.GetChild (0).transform.position, new Vector3 (lampList [x].transform.GetChild (0).transform.lossyScale.x / 2f, lampList [x].transform.GetChild (0).transform.lossyScale.y / 2f, lampList [x].transform.GetChild (0).transform.lossyScale.z / 2f), sunPos, Quaternion.identity, structure)) {
 						for (int t = 0; t < 2; t++) {
 							for (int u = 0; u < 2; u++) {

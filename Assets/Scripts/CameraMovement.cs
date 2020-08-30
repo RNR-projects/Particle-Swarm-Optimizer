@@ -3,33 +3,35 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class CameraMovement : MonoBehaviour {
-    public float speed = 0.30f;
-	[HideInInspector]public float h, v, Hangle, Vangle;
-    public float turnSpeed = 400f;
-    CursorLockMode state;
-	public GlobalScaler scaler;
+    private float baseSpeed = 0.06f;
+    private float speed;
+	private float horizontalAngle, verticalAngle;
+    private float turnSpeed = 400f;
 
-    void Start () {
-		scaler = GameObject.Find ("GlobalScaler").GetComponent<GlobalScaler> ();
+    void Update()
+    {
+        this.speed = this.baseSpeed * GlobalScaler.Instance().GetGlobalScale();
+        Vector3 move = Vector3.zero;
+
+        if (Cursor.lockState == CursorLockMode.Locked)
+        {
+            move.x = Input.GetAxis("Horizontal") * this.speed;
+            move.z = Input.GetAxis("Vertical") * this.speed;
+            this.transform.Translate(move);
+
+            this.horizontalAngle += Mathf.Clamp(Input.GetAxis("Mouse X"), -1, 1) * this.turnSpeed * Time.deltaTime;
+            this.verticalAngle += Mathf.Clamp(Input.GetAxis("Mouse Y"), -1, 1) * this.turnSpeed * Time.deltaTime;
+            this.transform.rotation = Quaternion.Euler(-this.verticalAngle, this.horizontalAngle, 0);
+        }
     }
 
-	void FixedUpdate () {
-		speed = .30f * scaler.GlobalScale;
-        Vector3 move = Vector3.zero;
-		if (state == CursorLockMode.Locked) {
-			h = Input.GetAxis("Horizontal");
-			v = Input.GetAxis("Vertical");
-			if (Cursor.lockState == CursorLockMode.Locked) {
-			Hangle += Mathf.Clamp (Input.GetAxis ("Mouse X"), -1, 1) * turnSpeed * Time.deltaTime;
-			Vangle += Mathf.Clamp (Input.GetAxis ("Mouse Y"), -1, 1) * turnSpeed * Time.deltaTime;
-			}
-		}
-        this.transform.rotation = Quaternion.Euler(-Vangle, Hangle, 0);
-        if (h != 0 || v != 0)
-        {
-            move.x = h * speed;
-            move.z = v * speed;
-            this.transform.Translate(move);
-        } 
+    public void SetHorizontalAngle(float value)
+    {
+        this.horizontalAngle = value;
+    }
+
+    public void SetVerticalAngle(float value)
+    {
+        this.verticalAngle = value;
     }
 }

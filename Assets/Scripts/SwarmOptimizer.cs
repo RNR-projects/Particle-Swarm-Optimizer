@@ -21,14 +21,12 @@ public class SwarmOptimizer : MonoBehaviour {
 	[HideInInspector] public float[] lumPointsX, lumPointsY, pointIlluminance;
 	private int lumIndex, it, check, inx;
 	private int[] candidateIndex;
-	public GlobalScaler scaler;
 	public GameObject[] calPoints;
 	public bool[] canBuild;
-	public Grid grid;
+	public GridCreator grid;
 
 	void Start() {
-		scaler = GameObject.Find ("GlobalScaler").GetComponent<GlobalScaler> ();
-		grid = GameObject.Find ("Grid").GetComponent<Grid> ();
+		grid = GameObject.Find ("Grid").GetComponent<GridCreator> ();
 		isBest = false;
 	}
 
@@ -61,12 +59,12 @@ public class SwarmOptimizer : MonoBehaviour {
 		GameObject[] fin = GameObject.FindGameObjectsWithTag ("Finish");
 		for (int i = 0; i < fin.Length; i++)
 			Destroy (fin [i]);
-		GameObject Road = Instantiate(road, new Vector3(roadLength / 2f * scaler.GlobalScale, -scaler.GlobalScale, roadWidth / 2f * scaler.GlobalScale), new Quaternion(0, 0, 0, 0));
-		Road.transform.localScale = new Vector3(roadLength / 10f * scaler.GlobalScale, scaler.GlobalScale, roadWidth / 10f * scaler.GlobalScale);
+		GameObject Road = Instantiate(road, new Vector3(roadLength / 2f * GlobalScaler.Instance().GetGlobalScale(), -GlobalScaler.Instance().GetGlobalScale(), roadWidth / 2f * GlobalScaler.Instance().GetGlobalScale()), new Quaternion(0, 0, 0, 0));
+		Road.transform.localScale = new Vector3(roadLength / 10f * GlobalScaler.Instance().GetGlobalScale(), GlobalScaler.Instance().GetGlobalScale(), roadWidth / 10f * GlobalScaler.Instance().GetGlobalScale());
 		calPoints = new GameObject[longCalPoints * 3];
 		for (int i = 0; i < longCalPoints * 3; i++) {
-			calPoints [i] = Instantiate (lightPoint, new Vector3 (lumPointsX [i] * scaler.GlobalScale, 0, lumPointsY [i] * scaler.GlobalScale), new Quaternion (0, 0, 0, 0));
-			calPoints[i].transform.localScale = new Vector3 (.02f * scaler.GlobalScale, .02f * scaler.GlobalScale, .15f * scaler.GlobalScale);
+			calPoints [i] = Instantiate (lightPoint, new Vector3 (lumPointsX [i] * GlobalScaler.Instance().GetGlobalScale(), 0, lumPointsY [i] * GlobalScaler.Instance().GetGlobalScale()), new Quaternion (0, 0, 0, 0));
+			calPoints[i].transform.localScale = new Vector3 (.02f * GlobalScaler.Instance().GetGlobalScale(), .02f * GlobalScaler.Instance().GetGlobalScale(), .15f * GlobalScaler.Instance().GetGlobalScale());
 		}
         r1 = Random.value;
         r2 = Random.value;
@@ -116,8 +114,8 @@ public class SwarmOptimizer : MonoBehaviour {
 	
 
 	void Update () {
-		cam.transform.position = new Vector3(Mathf.Clamp (cam.transform.position.x, 0, roadLength * scaler.GlobalScale), 
-			Mathf.Clamp (cam.transform.position.y, scaler.GlobalScale, 30f * scaler.GlobalScale), Mathf.Clamp (cam.transform.position.z, 0, roadWidth * scaler.GlobalScale));
+		cam.transform.position = new Vector3(Mathf.Clamp (cam.transform.position.x, 0, roadLength * GlobalScaler.Instance().GetGlobalScale()), 
+			Mathf.Clamp (cam.transform.position.y, GlobalScaler.Instance().GetGlobalScale(), 30f * GlobalScaler.Instance().GetGlobalScale()), Mathf.Clamp (cam.transform.position.z, 0, roadWidth * GlobalScaler.Instance().GetGlobalScale()));
 		if (cam.enabled && !started) {
 			start ();
 			started = true;
