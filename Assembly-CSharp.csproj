@@ -63,23 +63,31 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\Scripts\AverageScore.cs" />
-    <Compile Include="Assets\Scripts\Builder.cs" />
-    <Compile Include="Assets\Scripts\BuildingLocationsManager.cs" />
+    <Compile Include="Assets\Scripts\AreaLayout\BuildingHeightSetter.cs" />
+    <Compile Include="Assets\Scripts\AreaLayout\GridCreator.cs" />
+    <Compile Include="Assets\Scripts\AreaLayout\GridInteraction.cs" />
+    <Compile Include="Assets\Scripts\AreaLayout\StructureBuilder.cs" />
     <Compile Include="Assets\Scripts\CameraMovement.cs" />
-    <Compile Include="Assets\Scripts\GlobalScaler.cs" />
-    <Compile Include="Assets\Scripts\GridCreator.cs" />
-    <Compile Include="Assets\Scripts\GridInputHandler.cs" />
-    <Compile Include="Assets\Scripts\GridInteraction.cs" />
-    <Compile Include="Assets\Scripts\LightCalculator.cs" />
-    <Compile Include="Assets\Scripts\LightLevel.cs" />
-    <Compile Include="Assets\Scripts\Menu.cs" />
-    <Compile Include="Assets\Scripts\OptimizationParameterManager.cs" />
-    <Compile Include="Assets\Scripts\ProcessTracker.cs" />
+    <Compile Include="Assets\Scripts\InputHandlers\GridInputHandler.cs" />
+    <Compile Include="Assets\Scripts\InputHandlers\Menu.cs" />
+    <Compile Include="Assets\Scripts\InputHandlers\ObjectDataDisplayer.cs" />
+    <Compile Include="Assets\Scripts\InputHandlers\ProcessTracker.cs" />
+    <Compile Include="Assets\Scripts\ParticleSwarmOptimizer\AverageScore.cs" />
+    <Compile Include="Assets\Scripts\ParticleSwarmOptimizer\EnergyGenerationCalculator.cs" />
+    <Compile Include="Assets\Scripts\ParticleSwarmOptimizer\LightCalculator.cs" />
+    <Compile Include="Assets\Scripts\ParticleSwarmOptimizer\LightLevel.cs" />
+    <Compile Include="Assets\Scripts\ParticleSwarmOptimizer\LuminairePositionsCalculator.cs" />
+    <Compile Include="Assets\Scripts\ParticleSwarmOptimizer\ParticleSimulator.cs" />
+    <Compile Include="Assets\Scripts\ParticleSwarmOptimizer\SolutionParticle.cs" />
+    <Compile Include="Assets\Scripts\ParticleSwarmOptimizer\SwarmOptimizer.cs" />
     <Compile Include="Assets\Scripts\ScaleText.cs" />
-    <Compile Include="Assets\Scripts\SwarmOptimizer.cs" />
-    <Compile Include="Assets\Scripts\Switch.cs" />
-    <Compile Include="Assets\Scripts\Test.cs" />
+    <Compile Include="Assets\Scripts\Singletons\BuildingLocationsManager.cs" />
+    <Compile Include="Assets\Scripts\Singletons\DataParser.cs" />
+    <Compile Include="Assets\Scripts\Singletons\GlobalScaler.cs" />
+    <Compile Include="Assets\Scripts\Singletons\IlluminationPointsCreator.cs" />
+    <Compile Include="Assets\Scripts\Singletons\OptimizationParameterManager.cs" />
+    <Compile Include="Assets\Scripts\Singletons\ParticleGenerator.cs" />
+    <Compile Include="Assets\Scripts\Singletons\RoadAndLuminaireCreator.cs" />
     <Compile Include="Assets\Scripts\Toggle.cs" />
     <Compile Include="Assets\Scripts\Tooltip.cs" />
     <None Include="Assets\Resources\Data\Intensity_2.txt" />
