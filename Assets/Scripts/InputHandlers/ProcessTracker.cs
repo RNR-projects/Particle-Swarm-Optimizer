@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 public class ProcessTracker : MonoBehaviour {
 	public Texture2D tex;
-	private SwarmOptimizer swarm;
+	[SerializeField] private SwarmOptimizer swarm;
 	public GameObject structure;
 	[SerializeField] GameObject AreaLayoutObjects, MainMenuObjects, SwarmOptimizerObjects;
 	private OptimizationSteps currentStep;
@@ -51,6 +51,12 @@ public class ProcessTracker : MonoBehaviour {
 
 		MainMenuObjects.SetActive(false);
 		SwarmOptimizerObjects.SetActive(true);
+
+		RoadAndLuminaireCreator.Instance().CreateRoad();
+		IlluminationPointsCreator.Instance().InitializeIlluminationPoints();
+		StructureBuilder.Instance().CreateStructures();
+
+		swarm.InitializeOptimization();
 
 		this.currentStep = OptimizationSteps.SwarmOptimization;
 		Cursor.lockState = CursorLockMode.Locked;

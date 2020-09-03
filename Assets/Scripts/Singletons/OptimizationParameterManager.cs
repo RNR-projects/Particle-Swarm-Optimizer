@@ -114,7 +114,7 @@ public class OptimizationParameterManager
 
     public void SetLuminaireHeightPivot(float value)
     {
-        this.LuminaireHeightPivot = value;
+        this.LuminaireHeightPivot = Mathf.Max(value, 6);
     }
 
     public float GetLuminaireHeightPivot()

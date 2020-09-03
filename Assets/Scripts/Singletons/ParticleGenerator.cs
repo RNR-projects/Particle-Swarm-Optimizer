@@ -26,8 +26,6 @@ public class ParticleGenerator
 		for (int i = 0; i < particleCount; i++)
         {
 			SolutionParticle newParticle = new SolutionParticle();
-			newParticle.spacingVelocity = 0;
-			newParticle.heightVelocity = 0;
 			if (parameters.GetLessThanCountPivot())
 			{
 				if (parameters.GetEqualToCountPivot())
@@ -78,16 +76,52 @@ public class ParticleGenerator
 			else
 				newParticle.height = Mathf.Clamp(parameters.GetLuminaireHeightPivot(), 6f, 20f);
 
-			newParticle.closestSpacing = newParticle.spacing;
-			newParticle.closestHeight = newParticle.height;
 			newParticle.luminaireCount = Mathf.FloorToInt(parameters.GetRoadLength() / newParticle.spacing) + 1;
 			if (parameters.GetLuminaireArrangement() == OptimizationParameterManager.LuminaireArrangementSettings.Paired)
 				newParticle.luminaireCount *= 2;
 			newParticle.isBuildable = true;
 			newParticle.isReversed = false;
 			newParticle.xOffset = 0;
+
+			particles.Add(newParticle);
 		}
 
 		return particles;
     }
+
+	public List<SolutionParticle> CopyParticles(List<SolutionParticle> particles)
+    {
+		List<SolutionParticle> copiedList = new List<SolutionParticle>();
+
+		foreach(SolutionParticle particle in particles)
+        {
+			SolutionParticle newParticle = new SolutionParticle();
+
+			newParticle.spacing = particle.spacing;
+			newParticle.height = particle.height;
+			newParticle.luminaireCount = particle.luminaireCount;
+			newParticle.isBuildable = particle.isBuildable;
+			newParticle.isReversed = particle.isReversed;
+			newParticle.xOffset = particle.xOffset;
+
+			copiedList.Add(newParticle);
+        }
+
+		return copiedList;
+    }
+
+	public SolutionParticle CopyParticle(SolutionParticle particle)
+	{
+
+		SolutionParticle newParticle = new SolutionParticle();
+
+		newParticle.spacing = particle.spacing;
+		newParticle.height = particle.height;
+		newParticle.luminaireCount = particle.luminaireCount;
+		newParticle.isBuildable = particle.isBuildable;
+		newParticle.isReversed = particle.isReversed;
+		newParticle.xOffset = particle.xOffset;
+
+		return newParticle;
+	}
 }

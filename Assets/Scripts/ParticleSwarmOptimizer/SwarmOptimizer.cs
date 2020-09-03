@@ -4,324 +4,375 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class SwarmOptimizer : MonoBehaviour {
-    public int particleCount, iterations;
-    private float[] index,
-	tempAverages, tempMinimums, tempEfficiencies, tempDevAverage, tempDevMinimum, tempScore;
-    private float c1 = 0.75f, c2 = 0.75f, r1, r2, bestSpacing, bestHeight;
-    public float lowestAverageIlluminance, highestAverageilluminance, minimumIlluminance, roadLength, roadWidth, heightLimit, luminaireLimit, finalSpacing, finalHeight, minScore;
-    private LightCalculator lightCalculator;
-    public Text text;
-	public GameObject road, lightPoint;
-	private int currentIteration = 0;
-	public Camera cam;
-	private bool started = false, buildabl = false;
-	public bool isBest, hBool1, hBool2, hBool3, sBool1, sBool2, sBool3, arrangement1 = true, arrangement2 = false, arrangement3 = false;
-	public int longCalPoints;
-	[HideInInspector] public float pointDistanceX, pointDistanceY, pointEdgeX, pointEdgeY;
-	private int it, check;
-	private int[] candidateIndex;
-	public GridCreator grid;
-	private List<SolutionParticle> particles;
+	private int particleCount;
+	private int iterationsToRun;
 
-	void Start() {
-		grid = GameObject.Find ("Grid").GetComponent<GridCreator> ();
-		isBest = false;
+	private float c1 = 0.75f;
+	private float c2 = 0.75f;
+	private float r1;
+	private float r2;
+
+	private float bestSpacing;
+	private float bestHeight;
+	private SolutionParticle bestParticle;
+	private bool bestIsBuildable;
+
+	private float allTimeBestSpacing;
+	private float allTimeBestHeight;
+
+	private int currentIteration;
+	private int consecutivelyBestCount;
+
+	private List<float> devFromAverage;
+	private List<float> devFromMinimum;
+	private List<float> trialDevFromAverage;
+	private List<float> trialDevFromMinimum;
+
+	private List<float> spacingVelocity;
+	private List<float> heightVelocity;
+
+	private List<float> personalBestSpacing;
+	private List<float> personalBestHeight;
+
+	void Awake() {
+		this.particleCount = OptimizationParameterManager.PARTICLECOUNT;
+		this.iterationsToRun = OptimizationParameterManager.ITERATIONLIMIT;
+
+		this.devFromAverage = new List<float>();
+		this.devFromMinimum = new List<float>();
+		this.trialDevFromAverage = new List<float>();
+		this.trialDevFromMinimum = new List<float>();
+		this.spacingVelocity = new List<float>();
+		this.heightVelocity = new List<float>();
+		this.personalBestHeight = new List<float>();
+		this.personalBestSpacing = new List<float>();
 	}
 
-	public void start () {
-		check = 0;
-		finalSpacing = 0;
-		finalHeight = 0;
+	public void InitializeOptimization()
+	{
+		this.r1 = Random.value;
+		this.r2 = Random.value;
 
-		currentIteration = 0;
-		GameObject[] fin = GameObject.FindGameObjectsWithTag ("Finish");
-		for (int i = 0; i < fin.Length; i++)
-			Destroy (fin [i]);
+		List<SolutionParticle> particles = ParticleGenerator.Instance().InitializeNewParticles(this.particleCount);
 
-		RoadAndLuminaireCreator.Instance().CreateRoad();
+		for (int i = 0; i < this.particleCount; i++)
+		{
+			this.spacingVelocity.Add(0);
+			this.heightVelocity.Add(0);
+			this.personalBestHeight.Add(particles[i].height);
+			this.personalBestSpacing.Add(particles[i].spacing);
+			this.trialDevFromAverage.Add(0);
+			this.trialDevFromMinimum.Add(0);
+		}
 
-		IlluminationPointsCreator.Instance().InitializeIlluminationPoints();
-
-        r1 = Random.value;
-        r2 = Random.value;
-        text = GetComponent<Text>();
-        tempAverages = new float[particleCount];
-        tempDevAverage = new float[particleCount];
-        tempDevMinimum = new float[particleCount];
-        tempEfficiencies = new float[particleCount];
-        tempMinimums = new float[particleCount];
-		tempScore = new float[particleCount];
-		particles = ParticleGenerator.Instance().InitializeNewParticles(particleCount);
-        StartCoroutine("BeginFirstIteration");
+		StartCoroutine(this.BeginFirstIteration(particles));
 	}
-	
 
-	void Update () {
-		cam.transform.position = new Vector3(Mathf.Clamp (cam.transform.position.x, 0, roadLength * GlobalScaler.Instance().GetGlobalScale()), 
-			Mathf.Clamp (cam.transform.position.y, GlobalScaler.Instance().GetGlobalScale(), 30f * GlobalScaler.Instance().GetGlobalScale()), Mathf.Clamp (cam.transform.position.z, 0, roadWidth * GlobalScaler.Instance().GetGlobalScale()));
-		if (cam.enabled && !started) {
-			start ();
-			started = true;
-		}
-		if (!cam.enabled)
-			started = false;
-		text.text = "Iteration " + currentIteration + "\nHeight: " + bestHeight + "\nSpacing: " + bestSpacing;
-    }
-
-	public void ClearData()
+    IEnumerator BeginFirstIteration(List<SolutionParticle> particles)
     {
-        GameObject[] gameObject = GameObject.FindGameObjectsWithTag("Respawn");
-		for (int i = 0; i < gameObject.Length; i++) {
-			BoxCollider col = gameObject [i].GetComponent<BoxCollider> ();
-			if (col != null)
-				col.enabled = false;
-			Destroy (gameObject [i]);
-		}
-    }
+		OptimizationParameterManager parameters = OptimizationParameterManager.Instance();
 
-    IEnumerator BeginFirstIteration()
-    {
-        LightCalculator lightCalculator = this.transform.GetComponentInParent<LightCalculator>();
         for (int i = 0; i < particleCount; i++)
         {
-            lightCalculator.spacing = particles[i].spacing;
-            lightCalculator.height = particles[i].height;
-			ClearData ();
-            lightCalculator.CalcIlluminance(particles[i]);
-			particles[i].spacing = lightCalculator.spacing;
-			particles[i].isBuildable = lightCalculator.buildable;
-            particles[i].averageIlluminance = (float)lightCalculator.averageIlluminance;
-            particles[i].lowestIlluminanceAtAPoint = lightCalculator.minIlluminance;
-			particles[i].lowestEnergyGeneratedByALuminaire = lightCalculator.score;
-            particles[i].lightingEfficiency = lightCalculator.lightingEfficiency;
-            if (particles[i].averageIlluminance >= lowestAverageIlluminance && particles[i].averageIlluminance <= highestAverageilluminance)
-                particles[i].deviationFromAverageIlluminanceLimit = 0;
-            else if (particles[i].averageIlluminance < lowestAverageIlluminance)
-                particles[i].deviationFromAverageIlluminanceLimit = lowestAverageIlluminance - particles[i].averageIlluminance;
-            else
-                particles[i].deviationFromAverageIlluminanceLimit = particles[i].averageIlluminance - highestAverageilluminance;
-            if (particles[i].lowestIlluminanceAtAPoint >= minimumIlluminance)
-                particles[i].deviationFromMinimumIlluminanceAtAPoint = 0;
-            else
-                particles[i].deviationFromMinimumIlluminanceAtAPoint = minimumIlluminance - particles[i].lowestIlluminanceAtAPoint;
+			ParticleSimulator.Instance().SimulateParticle(particles[i]);
+
+			if (particles[i].averageIlluminance >= parameters.GetMinimumAverageIlluminance() &&
+				particles[i].averageIlluminance <= parameters.GetMaximumAverageIlluminance())
+			{
+				this.devFromAverage.Add(0);
+			}
+			else if (particles[i].averageIlluminance < parameters.GetMinimumAverageIlluminance())
+			{
+				this.devFromAverage.Add(parameters.GetMinimumAverageIlluminance() - particles[i].averageIlluminance);
+			}
+			else
+			{
+				this.devFromAverage.Add(particles[i].averageIlluminance - parameters.GetMaximumAverageIlluminance());
+			}
+			if (particles[i].lowestIlluminanceAtAPoint >= parameters.GetMinimumIlluminanceAtAnyPoint())
+			{
+				this.devFromMinimum.Add(0);
+			}
+			else
+			{
+				this.devFromMinimum.Add(parameters.GetMinimumIlluminanceAtAnyPoint() - particles[i].lowestIlluminanceAtAPoint);
+			}
         }
-        SetBest();
-		isBest = true;
-		lightCalculator.spacing = bestSpacing;
-		lightCalculator.height = bestHeight;
-		ClearData();
-		lightCalculator.CalcIlluminance(particles[0]);
-        StartCoroutine("AdjustData");
-		yield return new WaitForSeconds (.01f);
+
+        this.SetBest(particles);
+
+		yield return new WaitForSeconds(.01f);
+
+		StartCoroutine(this.OptimizeSwarm(particles));	
     }
 
-    IEnumerator AdjustData()
+    IEnumerator OptimizeSwarm(List<SolutionParticle> particles)
     {
-        LightCalculator lightCalculator = this.transform.GetComponentInParent<LightCalculator>();
-        for (int i = 0; i < iterations; i++)
+        for (int i = 0; i < iterationsToRun; i++)
         {
-            for (int j = 0; j < particleCount; j++)
-            {
-				particles[j].spacingVelocity = CalcVelocity(particles[j].spacingVelocity, particles[j].closestSpacing, particles[j].spacing, bestSpacing);
-				particles[j].heightVelocity = CalcVelocity(particles[j].heightVelocity, particles[j].closestHeight, particles[j].height, bestHeight);
+			RoadAndLuminaireCreator.Instance().ClearLuminaires();
 
-				if (sBool1 && particles[j].spacingVelocity + particles[j].spacing < roadLength / (luminaireLimit - 1)) 
-				{
-					if (sBool2)
-						particles[j].spacing = roadLength / (luminaireLimit - 1f);
-					else
-						particles[j].spacing = roadLength / (luminaireLimit - 1f) + .5f;
-				} 
-				else if (sBool3 && (particles[j].spacingVelocity + particles[j].spacing > roadLength / luminaireLimit || particles[j].spacingVelocity + particles[j].spacing <= 5)) 
-				{
-					if (particles[j].spacingVelocity + particles[j].spacing <= 5)
-						particles[j].spacing = 6f;
-					else if (sBool2)
-						particles[j].spacing = roadLength / luminaireLimit;
-					else
-						particles[j].spacing = roadLength / luminaireLimit - .5f;
-				} 
-				else if (particles[j].spacingVelocity + particles[j].spacing > roadLength)
-					particles[j].spacing = roadLength;
-				else if (sBool2 && (particles[j].spacingVelocity + particles[j].spacing > roadLength / (luminaireLimit - 1f) || particles[j].spacingVelocity + particles[j].spacing < roadLength / luminaireLimit)) 
-				{
-					if (particles[j].spacingVelocity + particles[j].spacing > roadLength / (luminaireLimit - 1f))
-						particles[j].spacing = roadLength / (luminaireLimit - 1f);
-					else
-						particles[j].spacing = roadLength / luminaireLimit;
-				}
-                else
-					particles[j].spacing += particles[j].spacingVelocity;
-				if (particles[j].heightVelocity + particles[j].height < 6f)
-					particles[j].height = 6f;
-				else if(hBool1 && particles[j].heightVelocity + particles[j].height > heightLimit) 
-				{
-					if(hBool2)
-						particles[j].height = heightLimit;
-					else
-						particles[j].height = heightLimit - .5f;
-				} 
-				else if (hBool3 && particles[j].heightVelocity + particles[j].height < heightLimit) 
-				{
-					if(hBool2)
-						particles[j].height = heightLimit;
-					else
-						particles[j].height = heightLimit + .5f;
-				} 
-				else if(hBool2)
-					particles[j].height = heightLimit;
-                else
-                    particles[j].height += particles[j].heightVelocity;
-            }
+			List<SolutionParticle> trialParticles = this.AdjustParticles(particles);
+			//check if the new parameters of the particles is better than the old ones
+			this.RunIteration(trialParticles);
+			//if they are better, replace the previous particle with its newer version
             for (int j = 0; j < particleCount; j++)
             {
-                lightCalculator.spacing = particles[j].spacing;
-                lightCalculator.height = particles[j].height;
-				ClearData ();
-                lightCalculator.CalcIlluminance(particles[j]);
-				particles[j].spacing = lightCalculator.spacing;
-				particles[j].isBuildable = lightCalculator.buildable;
-                tempAverages[j] = (float)lightCalculator.averageIlluminance;
-                tempMinimums[j] = lightCalculator.minIlluminance;
-				tempScore [j] = lightCalculator.score;
-                tempEfficiencies[j] = lightCalculator.lightingEfficiency;
-                if (tempAverages[j] >= lowestAverageIlluminance && tempAverages[j] <= highestAverageilluminance)
-                    tempDevAverage[j] = 0;
-                else if (tempAverages[j] < lowestAverageIlluminance)
-                    tempDevAverage[j] = lowestAverageIlluminance - tempAverages[j];
-                else
-                    tempDevAverage[j] = tempAverages[j] - highestAverageilluminance;
-                if (tempMinimums[j] >= minimumIlluminance)
-                    tempDevMinimum[j] = 0;
-                else
-                    tempDevMinimum[j] = minimumIlluminance - tempMinimums[j];
-            }
-            for (int j = 0; j < particleCount; j++)
-            {
-                if (particles[j].spacing >= 0 && particles[j].height >= 0)
+                if (particles[j].spacing > 0 && particles[j].height > 0)
                 {
-                    if (tempDevAverage[j] < particles[j].deviationFromAverageIlluminanceLimit)
-                        AdjustOptimal(j);
-                    else if (tempDevAverage[j] == particles[j].deviationFromAverageIlluminanceLimit)
+                    if (trialDevFromAverage[j] < this.devFromAverage[j])
+                        RegisterBetterParticle(j, particles, trialParticles[j]);
+                    else if (trialDevFromAverage[j] == this.devFromAverage[j])
                     {
-						if (tempDevMinimum [j] < particles[j].deviationFromMinimumIlluminanceAtAPoint)
-							AdjustOptimal (j);
-						else if (tempDevMinimum [j] == particles[j].deviationFromMinimumIlluminanceAtAPoint) {
-							if (tempEfficiencies [j] > particles[j].lightingEfficiency)
-								AdjustOptimal (j);
-							else if (tempEfficiencies [j] <= particles[j].lightingEfficiency && tempScore [j] < particles[j].lightingEfficiency)
-								AdjustOptimal (j);
-						}
+                        if (trialDevFromMinimum[j] < this.devFromMinimum[j])
+                            RegisterBetterParticle(j, particles, trialParticles[j]);
+                        else if (trialDevFromMinimum[j] == this.devFromMinimum[j])
+                        {
+                            if (trialParticles[j].lightingEfficiency > particles[j].lightingEfficiency)
+                                RegisterBetterParticle(j, particles, trialParticles[j]);
+                            else if (trialParticles[j].lightingEfficiency <= particles[j].lightingEfficiency &&
+                                            trialParticles[j].lowestEnergyGeneratedByALuminaire > particles[j].lowestEnergyGeneratedByALuminaire)
+                                RegisterBetterParticle(j, particles, trialParticles[j]);
+                        }
                     }
                 }
             }
-			it = i;
-            SetBest();
-			ClearData();
-			isBest = true;
-			lightCalculator.spacing = bestSpacing;
-			lightCalculator.height = bestHeight;
-			lightCalculator.CalcIlluminance (particles[i]);
-			if (check > 9) {
-				StopCoroutine ("AdjustData");
-				if (!buildabl)
-					start ();
+
+			this.currentIteration++;
+
+            SetBest(particles);
+
+			if (this.consecutivelyBestCount > 9) {
+				StopCoroutine (this.OptimizeSwarm(particles));
+				ParticleSimulator.Instance().RepeatSimulatedParticle(this.bestParticle);
+				if (!this.bestIsBuildable)
+					InitializeOptimization ();
 			}
-			if (it + 1 == iterations) {
-				if (!buildabl)
-					start ();
+			if (this.currentIteration + 1 == this.iterationsToRun) {
+				ParticleSimulator.Instance().RepeatSimulatedParticle(this.bestParticle);
+				if (!this.bestIsBuildable)
+					InitializeOptimization ();
 			}
-			currentIteration++;
 			yield return new WaitForSeconds (.01f);
         }
     }
 
-    private void AdjustOptimal(int index)
+	private List<SolutionParticle> AdjustParticles(List<SolutionParticle> particles)
     {
-        particles[index].closestSpacing = particles[index].spacing;
-        particles[index].closestHeight = particles[index].height;
-        particles[index].averageIlluminance = tempAverages[index];
-        particles[index].lowestIlluminanceAtAPoint = tempMinimums[index];
-        particles[index].lightingEfficiency = tempEfficiencies[index];
-        particles[index].deviationFromAverageIlluminanceLimit = tempDevAverage[index];
-        particles[index].deviationFromMinimumIlluminanceAtAPoint = tempDevMinimum[index];
-		particles[index].lightingEfficiency = tempScore [index];
-    }
+		OptimizationParameterManager parameters = OptimizationParameterManager.Instance();
 
-    private void SetBest()
-    {
-        float[] bestCandidates1 = new float[particleCount];
-        int[] foundIndex1 = new int[particleCount];
-        int ind1 = 0;
+		for (int j = 0; j < particleCount; j++)
+		{
+			this.spacingVelocity[j] = CalcVelocity(this.spacingVelocity[j], this.personalBestSpacing[j], particles[j].spacing, this.bestSpacing);
+			this.heightVelocity[j] = CalcVelocity(this.heightVelocity[j], this.personalBestHeight[j], particles[j].height, this.bestHeight);
 
-        for (int i = 0; i < particleCount; i++)
-        {
-			if (particles[i].deviationFromAverageIlluminanceLimit == Mathf.Min(devAverage) && particles[i].isBuildable)
-            {
-                bestCandidates1[ind1] = particles[i].deviationFromMinimumIlluminanceAtAPoint;
-                foundIndex1[ind1] = i;
-                ind1++;
-            }
-        }
-        float[] bestCandidates2 = new float[ind1];
-        float[] bestCandidates3 = new float[ind1];
-		float[] bestCandidates31 = new float[ind1];
-		int[] foundIndex3 = new int[ind1];
-        int[] foundIndex2 = new int[ind1];
-        int ind2 = 0;
-		int ind3 = 0;
-        for (int i = 0; i < ind1; i++)
-        {
-            bestCandidates2[i] = bestCandidates1[i];
-        }
-        for (int i = 0; i < ind1; i++)
-        {
-            if (bestCandidates2[i] == Mathf.Min(bestCandidates2))
-            {
-                bestCandidates3[ind2] = particles[foundIndex1[i]].lightingEfficiency;
-				bestCandidates31 [ind2] = particles[foundIndex1 [i]].lightingEfficiency;
-                foundIndex2[ind2] = foundIndex1[i];
-                ind2++;
-            }
-        }
-		float[] bestCandidates4 = new float[ind2];
-		for (int i = 0; i < ind2; i++) {
-			if (bestCandidates31 [i] >= minScore) {
-				bestCandidates4 [ind3] = particles[foundIndex2 [i]].lightingEfficiency;
-				foundIndex3 [ind3] = foundIndex2 [i];
-				ind3++;
-			}
-		}
-		int index = 0;
-		if (ind3 == 0) {
-			if (ind2 == 0) {
-				if (ind1 == 0)
-					index = System.Array.IndexOf (devAverage, Mathf.Min (devAverage));
+			if (parameters.GetLessThanCountPivot() && this.spacingVelocity[j] + particles[j].spacing < 
+								parameters.GetRoadLength() / (parameters.GetLuminaireCountPivot() - 1))
+			{
+				if (parameters.GetEqualToCountPivot())
+					particles[j].spacing = parameters.GetRoadLength() / (parameters.GetLuminaireCountPivot() - 1f);
 				else
-					index = foundIndex1 [System.Array.IndexOf (bestCandidates2, Mathf.Min (bestCandidates2))];
+					particles[j].spacing = parameters.GetRoadLength() / (parameters.GetLuminaireCountPivot() - 1f) + .5f;
+			}
+			else if (parameters.GetGreaterThanCountPivot() && (this.spacingVelocity[j] + particles[j].spacing > 
+						parameters.GetRoadLength() / parameters.GetLuminaireCountPivot() || 
+						this.spacingVelocity[j] + particles[j].spacing <= 5))
+			{
+				if (this.spacingVelocity[j] + particles[j].spacing <= 5)
+					particles[j].spacing = 6f;
+				else if (parameters.GetEqualToCountPivot())
+					particles[j].spacing = parameters.GetRoadLength() / parameters.GetLuminaireCountPivot();
+				else
+					particles[j].spacing = parameters.GetRoadLength() / parameters.GetLuminaireCountPivot() - .5f;
+			}
+			else if (this.spacingVelocity[j] + particles[j].spacing > parameters.GetRoadLength())
+				particles[j].spacing = parameters.GetRoadLength();
+			else if (parameters.GetEqualToCountPivot() && (this.spacingVelocity[j] + particles[j].spacing > 
+						parameters.GetRoadLength() / (parameters.GetLuminaireCountPivot() - 1f) || 
+						this.spacingVelocity[j] + particles[j].spacing < parameters.GetRoadLength() / parameters.GetLuminaireCountPivot()))
+			{
+				if (this.spacingVelocity[j] + particles[j].spacing > parameters.GetRoadLength() / (parameters.GetLuminaireCountPivot() - 1f))
+					particles[j].spacing = parameters.GetRoadLength() / (parameters.GetLuminaireCountPivot() - 1f);
+				else
+					particles[j].spacing = parameters.GetRoadLength() / parameters.GetLuminaireCountPivot();
 			}
 			else
-			index = foundIndex2 [System.Array.IndexOf (bestCandidates3, Mathf.Max (bestCandidates3))];
+				particles[j].spacing += this.spacingVelocity[j];
+			if (this.heightVelocity[j] + particles[j].height < 6f)
+				particles[j].height = 6f;
+			else if (parameters.GetLessThanHeightPivot() &&	
+						this.heightVelocity[j] + particles[j].height > parameters.GetLuminaireHeightPivot())
+			{
+				if (parameters.GetEqualToHeightPivot())
+					particles[j].height = parameters.GetLuminaireHeightPivot();
+				else
+					particles[j].height = parameters.GetLuminaireHeightPivot() - .5f;
+			}
+			else if (parameters.GetGreaterThanHeightPivot() && 
+						this.heightVelocity[j] + particles[j].height < parameters.GetLuminaireHeightPivot())
+			{
+				if (parameters.GetEqualToHeightPivot())
+					particles[j].height = parameters.GetLuminaireHeightPivot();
+				else
+					particles[j].height = parameters.GetLuminaireHeightPivot() + .5f;
+			}
+			else if (parameters.GetEqualToHeightPivot())
+				particles[j].height = parameters.GetLuminaireHeightPivot();
+			else
+				particles[j].height += this.heightVelocity[j];
 		}
-		else
-			index = foundIndex3[System.Array.IndexOf(bestCandidates4, Mathf.Max(bestCandidates4))];
-        bestSpacing = particles[index].spacing;
-        bestHeight = particles[index].height;
-		buildabl = particles[index].isBuildable;
-		if (it > Mathf.FloorToInt (iterations / 2.5f)) {
-			if (finalSpacing <= bestSpacing + .5f && finalSpacing >= bestSpacing - .5f && finalHeight <= bestHeight + .5f && finalHeight >= bestHeight - .5f)
-				check++;
-			else {
-				check = 0;
-				finalSpacing = bestSpacing;
-				finalHeight = bestHeight;
+
+		return ParticleGenerator.Instance().CopyParticles(particles);
+	}
+
+	private void RunIteration(List<SolutionParticle> particles)
+    {
+		OptimizationParameterManager parameters = OptimizationParameterManager.Instance();
+
+		for (int j = 0; j < particleCount; j++)
+		{
+			ParticleSimulator.Instance().SimulateParticle(particles[j]);
+
+			if (particles[j].averageIlluminance >= parameters.GetMinimumAverageIlluminance() &&
+						particles[j].averageIlluminance <= parameters.GetMaximumAverageIlluminance())
+				trialDevFromAverage[j] = 0;
+			else if (particles[j].averageIlluminance < parameters.GetMinimumAverageIlluminance())
+				trialDevFromAverage[j] = parameters.GetMinimumAverageIlluminance() - particles[j].averageIlluminance;
+			else
+				trialDevFromAverage[j] = particles[j].averageIlluminance - parameters.GetMaximumAverageIlluminance();
+			if (particles[j].lowestIlluminanceAtAPoint >= parameters.GetMinimumIlluminanceAtAnyPoint())
+				trialDevFromMinimum[j] = 0;
+			else
+				trialDevFromMinimum[j] = parameters.GetMinimumIlluminanceAtAnyPoint() - particles[j].lowestIlluminanceAtAPoint;
+		}
+	}
+
+    private void RegisterBetterParticle(int index, List<SolutionParticle> trueParticleList, SolutionParticle betterParticle)
+    {
+        this.personalBestSpacing[index] = betterParticle.spacing;
+        this.personalBestHeight[index] = betterParticle.height;
+
+		this.devFromAverage[index] = trialDevFromAverage[index];
+		this.devFromMinimum[index] = trialDevFromMinimum[index];
+
+		trueParticleList[index] = betterParticle;     
+    }
+
+    private void SetBest(List<SolutionParticle> particles)
+    {	
+        List<float> stage1Candidates = new List<float>();
+        List<int> stage1CandidatesIndices = new List<int>();
+		//stage 1 is filtering those that do not meet the minimum deviation from average illuminance which should be ideally 0
+		for (int i = 0; i < particleCount; i++)
+        {
+			if (this.devFromAverage[i] == Mathf.Min(this.devFromAverage.ToArray()) && particles[i].isBuildable)
+            {
+                stage1Candidates.Add(this.devFromMinimum[i]);
+                stage1CandidatesIndices.Add(i);
+            }
+        }
+
+        List<float> stage2Candidates = new List<float>();
+		List<int> stage2CandidateIndices = new List<int>();
+		//stage 2 is filtering those that do not meet the minimum deviation from lowest illuminance at a point which should ideally be 0 as well
+        for (int i = 0; i < stage1Candidates.Count; i++)
+        {
+            if (stage1Candidates[i] == Mathf.Min(stage1Candidates.ToArray()))
+            {
+				stage2Candidates.Add(particles[stage1CandidatesIndices[i]].lowestEnergyGeneratedByALuminaire);
+                stage2CandidateIndices.Add(stage1CandidatesIndices[i]);
+            }
+        }
+
+		List<float> finalCandidates = new List<float>();
+		List<float> failedStage3Candidates = new List<float>();
+		List<int> finalCandidateIndices = new List<int>();
+		List<int> failedStage3CandidateIndices = new List<int>();
+		//stage 3 filters those that do not meet the energy generation requirement
+		for (int i = 0; i < stage2Candidates.Count; i++) {
+			if (stage2Candidates[i] >= OptimizationParameterManager.Instance().GetMinimumTargetEnergyGeneration()) {
+				finalCandidates.Add(particles[stage2CandidateIndices[i]].lightingEfficiency);
+				finalCandidateIndices.Add(stage2CandidateIndices[i]);
+			}
+			else
+            {
+				failedStage3Candidates.Add(particles[stage2CandidateIndices[i]].lightingEfficiency);
+				failedStage3CandidateIndices.Add(stage2CandidateIndices[i]);
+            }
+		}
+
+		int index = 0;
+		//get the index of the "best" particle
+		if (finalCandidates.Count == 0)
+		{
+			if (stage2Candidates.Count == 0)
+			{	//if stage2candidates is empty, then stage1candidates must also be empty
+				index = this.devFromAverage.IndexOf(Mathf.Min(this.devFromAverage.ToArray()));
+			}
+			else
+			{
+				index = failedStage3CandidateIndices[failedStage3Candidates.IndexOf(Mathf.Max(failedStage3Candidates.ToArray()))];
 			}
 		}
-        particles[index].spacingVelocity = 0;
-        particles[index].heightVelocity = 0;
+		else
+		{
+			index = finalCandidateIndices[finalCandidates.IndexOf(Mathf.Max(finalCandidates.ToArray()))];
+		}
+
+        this.bestSpacing = particles[index].spacing;
+        this.bestHeight = particles[index].height;
+		this.bestIsBuildable = particles[index].isBuildable;
+		this.bestParticle = ParticleGenerator.Instance().CopyParticle(particles[index]);
+
+		if (currentIteration > Mathf.FloorToInt (iterationsToRun / 2.5f)) {
+			//if the current best particle is within 0.5m of the all time best particle's spacing and height, count it as being consecutively the best
+			if (this.allTimeBestSpacing <= this.bestSpacing + .5f && this.allTimeBestSpacing >= this.bestSpacing - .5f && 
+					this.allTimeBestHeight <= this.bestHeight + .5f && this.allTimeBestHeight >= this.bestHeight - .5f)
+				this.consecutivelyBestCount++;
+			else {
+				this.consecutivelyBestCount = 0;
+				this.allTimeBestSpacing = this.bestSpacing;
+				this.allTimeBestHeight = this.bestHeight;
+			}
+		}
+		//set the best particle's velocity to 0 so that it does not change until it is beaten by another
+        this.spacingVelocity[index] = 0;
+        this.heightVelocity[index] = 0;
     }
     
     private float CalcVelocity(float velocity,float closest, float position, float best){
         return velocity + c1 * r1 * (closest - position) + c2 * r2 * (best - position);
+    }
+
+	public void ClearData()
+	{
+		this.consecutivelyBestCount = 0;
+		this.allTimeBestSpacing = 0;
+		this.allTimeBestHeight = 0;
+		this.currentIteration = 0;
+		IlluminationPointsCreator.Instance().ClearIlluminationPoints();
+		RoadAndLuminaireCreator.Instance().ClearRoad();
+		StructureBuilder.Instance().ClearStructures();
+
+		this.devFromAverage.Clear();
+		this.devFromMinimum.Clear();
+		this.trialDevFromAverage.Clear();
+		this.trialDevFromMinimum.Clear();
+
+		this.spacingVelocity.Clear();
+		this.heightVelocity.Clear();
+
+		this.personalBestSpacing.Clear();
+		this.personalBestHeight.Clear();
+	}
+
+	public SolutionParticle GetBestParticle()
+    {
+		return this.bestParticle;
+    }
+
+	public int GetIterationsDone()
+    {
+		return this.currentIteration;
     }
 }

@@ -2,8 +2,27 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class LuminairePositionsCalculator : MonoBehaviour
+public class LuminairePositionsCalculator
 {
+	private static LuminairePositionsCalculator sharedInstance;
+
+	public static LuminairePositionsCalculator Instance()
+    {
+		if (sharedInstance == null)
+			sharedInstance = new LuminairePositionsCalculator();
+		return sharedInstance;
+    }
+
+	private LuminairePositionsCalculator()
+    {
+		this.RevNegOffsets = new List<float>();
+		this.RevPosOffsets = new List<float>();
+		this.pairedNegOffsets = new List<float>();
+		this.pairedPosOffsets = new List<float>();
+		this.OGNegOffsets = new List<float>();
+		this.OGPosOffsets = new List<float>();
+	}
+
 	/// <summary>
 	/// offsets needed to avoid structures in the X direction
 	/// </summary>
@@ -16,16 +35,6 @@ public class LuminairePositionsCalculator : MonoBehaviour
 	/// offsets needed to avoid structures in the X direction in the reversed state
 	/// </summary>
 	private List<float> RevPosOffsets, RevNegOffsets;
-
-	private void Awake()
-	{
-		this.RevNegOffsets = new List<float>();
-		this.RevPosOffsets = new List<float>();
-		this.pairedNegOffsets = new List<float>();
-		this.pairedPosOffsets = new List<float>();
-		this.OGNegOffsets = new List<float>();
-		this.OGPosOffsets = new List<float>();
-	}
 
 	public void CalculateFinalLuminairePositions(SolutionParticle particle)
 	{

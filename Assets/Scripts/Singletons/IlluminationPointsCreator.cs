@@ -19,7 +19,9 @@ public class IlluminationPointsCreator
 
     private IlluminationPointsCreator()
     {
-
+        this.illuminationPointXCoords = new List<float>();
+        this.illuminationPointYCoords = new List<float>();
+        this.instantiatedObjects = new List<GameObject>();
     }
 
     public void RegisterIlluminationPoint(GameObject prefab)
