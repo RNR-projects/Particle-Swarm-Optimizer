@@ -5,10 +5,19 @@ using UnityEngine.UI;
 
 public class ResultsDataDisplay : MonoBehaviour
 {
-    public Text particleBasicsDisplay;
-    public Text particleSpecificsDisplay;
+    [SerializeField] private Text particleBasicsDisplay;
+    [SerializeField] private Text particleSpecificsDisplay;
+
+    [SerializeField] private Image progressBar;
+    [SerializeField] private Text progressBarText;
+    [SerializeField] private GameObject progressBarHolder;
 
     [SerializeField] private SwarmOptimizer swarm;
+
+    private void OnDisable()
+    {
+        this.progressBarHolder.SetActive(true);
+    }
 
     // Update is called once per frame
     void Update()
@@ -20,20 +29,43 @@ public class ResultsDataDisplay : MonoBehaviour
             Mathf.Clamp(Camera.main.transform.position.z, 0, OptimizationParameterManager.Instance().GetRoadWidth() *
                 GlobalScaler.Instance().GetGlobalScale()));
 
-        Cursor.visible = true;
-
         SolutionParticle bestParticle = swarm.GetBestParticle();
-        if (bestParticle != null)
-        {
-            particleBasicsDisplay.text = "Iteration " + swarm.GetIterationsDone() + 
-                                        "\nHeight: " + bestParticle.height + 
-                                        "\nSpacing: " + bestParticle.spacing;
 
-            particleSpecificsDisplay.text = "Average: " + bestParticle.averageIlluminance + 
-                                            "\nMin: " + bestParticle.lowestIlluminanceAtAPoint + 
-                                            "\nEfficiency:" + bestParticle.lightingEfficiency + 
-                                            "\nOffset:" + (bestParticle.xOffset + 
-                                            OptimizationParameterManager.Instance().GetRoadLength() % bestParticle.spacing);	
+        if (progressBarHolder.activeSelf)
+        {
+            progressBar.fillAmount = (float)swarm.GetIterationsDone() / (float)OptimizationParameterManager.ITERATIONLIMIT;
+            progressBarText.text = swarm.GetIterationsDone() + " / " + OptimizationParameterManager.ITERATIONLIMIT;
+            if (swarm.optimizationIsDone)
+            {
+                progressBarText.text = "FINISHED";
+                //ParticleSimulator.Instance().RepeatSimulatedParticle(bestParticle);
+                StartCoroutine(this.RemoveBar());
+            }
+
+            Cursor.lockState = CursorLockMode.None;
         }
+        else
+        {
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = true;
+        }
+
+        
+
+        particleBasicsDisplay.text = "Iteration " + swarm.GetIterationsDone() +
+                                    "\nHeight: " + bestParticle.height +
+                                    "\nSpacing: " + bestParticle.spacing;
+
+        particleSpecificsDisplay.text = "Average: " + bestParticle.averageIlluminance +
+                                        "\nMin: " + bestParticle.lowestIlluminanceAtAPoint +
+                                        "\nEfficiency:" + bestParticle.lightingEfficiency +
+                                        "\nOffset:" + (bestParticle.xOffset +
+                                        OptimizationParameterManager.Instance().GetRoadLength() % bestParticle.spacing / 2f);
+    }
+
+    private IEnumerator RemoveBar()
+    {
+        yield return new WaitForSeconds(0.1f);
+        progressBarHolder.SetActive(false);
     }
 }

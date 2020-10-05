@@ -16,6 +16,12 @@ public class GridInputHandler : MonoBehaviour
     {
 		BuildingLocationsManager.Instance().SetBuilderUI(this.builderUI);
     }
+
+    private void OnEnable()
+    {
+		this.roadDirection = 0;
+		this.compassDirection = 0;
+    }
     // Update is called once per frame
     void Update()
 	{

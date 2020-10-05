@@ -5,7 +5,7 @@ using UnityEngine;
 public class StructureBuilder
 {
     private static StructureBuilder sharedInstance;
-
+    private GameObject parentObject;
     public static StructureBuilder Instance()
     {
         if (sharedInstance == null)
@@ -30,6 +30,10 @@ public class StructureBuilder
         {
             GameObject newBuilding = GameObject.Instantiate(structurePrefab, locations[i], Quaternion.Euler(0, 0, 0));
             newBuilding.transform.localScale = sizes[i];
+            if (this.parentObject == null)
+                this.parentObject = GameObject.Find("Swarm");
+            newBuilding.transform.parent = this.parentObject.transform;
+
             structures.Add(newBuilding);
         }
     }

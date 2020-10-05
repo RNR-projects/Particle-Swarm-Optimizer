@@ -112,7 +112,6 @@ public class ParticleGenerator
 
 	public SolutionParticle CopyParticle(SolutionParticle particle)
 	{
-
 		SolutionParticle newParticle = new SolutionParticle();
 
 		newParticle.spacing = particle.spacing;

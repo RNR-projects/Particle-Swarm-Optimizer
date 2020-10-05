@@ -229,6 +229,7 @@ public class Menu : MonoBehaviour {
 	public void ReturnToRoadParameters()
     {
 		this.currentProgress = ProgressLevel.RoadParameters;
+		BuildingLocationsManager.Instance().Reset();
 		this.lightingParameterUI.SetActive(false);
 		this.roadParameterUI.SetActive(true);
 		this.PressAlternatingArrangement();

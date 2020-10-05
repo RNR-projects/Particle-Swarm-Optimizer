@@ -34,6 +34,8 @@ public class SwarmOptimizer : MonoBehaviour {
 	private List<float> personalBestSpacing;
 	private List<float> personalBestHeight;
 
+	public bool optimizationIsDone;
+
 	void Awake() {
 		this.particleCount = OptimizationParameterManager.PARTICLECOUNT;
 		this.iterationsToRun = OptimizationParameterManager.ITERATIONLIMIT;
@@ -46,10 +48,12 @@ public class SwarmOptimizer : MonoBehaviour {
 		this.heightVelocity = new List<float>();
 		this.personalBestHeight = new List<float>();
 		this.personalBestSpacing = new List<float>();
+		this.currentIteration = 0;
 	}
 
 	public void InitializeOptimization()
 	{
+		this.optimizationIsDone = false;
 		this.r1 = Random.value;
 		this.r2 = Random.value;
 
@@ -142,20 +146,22 @@ public class SwarmOptimizer : MonoBehaviour {
 
             SetBest(particles);
 
-			if (this.consecutivelyBestCount > 9) {
-				StopCoroutine (this.OptimizeSwarm(particles));
-				ParticleSimulator.Instance().RepeatSimulatedParticle(this.bestParticle);
-				if (!this.bestIsBuildable)
-					InitializeOptimization ();
+			if (this.consecutivelyBestCount > 9) {				
+				this.optimizationIsDone = true;
+				//if (!this.bestIsBuildable)
+				//	InitializeOptimization ();
+				break;
 			}
 			if (this.currentIteration + 1 == this.iterationsToRun) {
-				ParticleSimulator.Instance().RepeatSimulatedParticle(this.bestParticle);
-				if (!this.bestIsBuildable)
-					InitializeOptimization ();
+				this.optimizationIsDone = true;
+				//if (!this.bestIsBuildable)
+				//	InitializeOptimization ();
 			}
 			yield return new WaitForSeconds (.01f);
         }
-    }
+		yield return new WaitForSeconds(1f);
+		ParticleSimulator.Instance().RepeatSimulatedParticle(this.bestParticle);
+	}
 
 	private List<SolutionParticle> AdjustParticles(List<SolutionParticle> particles)
     {
@@ -165,6 +171,8 @@ public class SwarmOptimizer : MonoBehaviour {
 		{
 			this.spacingVelocity[j] = CalcVelocity(this.spacingVelocity[j], this.personalBestSpacing[j], particles[j].spacing, this.bestSpacing);
 			this.heightVelocity[j] = CalcVelocity(this.heightVelocity[j], this.personalBestHeight[j], particles[j].height, this.bestHeight);
+
+			particles[j].xOffset = 0;
 
 			if (parameters.GetLessThanCountPivot() && this.spacingVelocity[j] + particles[j].spacing < 
 								parameters.GetRoadLength() / (parameters.GetLuminaireCountPivot() - 1))
@@ -198,6 +206,11 @@ public class SwarmOptimizer : MonoBehaviour {
 			}
 			else
 				particles[j].spacing += this.spacingVelocity[j];
+
+			particles[j].luminaireCount = Mathf.FloorToInt(parameters.GetRoadLength() / particles[j].spacing) + 1;
+			if (parameters.GetLuminaireArrangement() == OptimizationParameterManager.LuminaireArrangementSettings.Paired)
+				particles[j].luminaireCount *= 2;
+
 			if (this.heightVelocity[j] + particles[j].height < 6f)
 				particles[j].height = 6f;
 			else if (parameters.GetLessThanHeightPivot() &&	
@@ -231,6 +244,8 @@ public class SwarmOptimizer : MonoBehaviour {
 
 		for (int j = 0; j < particleCount; j++)
 		{
+			particles[j].xOffset = 0;
+
 			ParticleSimulator.Instance().SimulateParticle(particles[j]);
 
 			if (particles[j].averageIlluminance >= parameters.GetMinimumAverageIlluminance() &&

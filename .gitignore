@@ -2,3 +2,7 @@ Library/Artifacts/
 Temp/
 Library/ShaderCache/
 Library/StateCache/
+Library/
+.vs/
+Assembly-CSharp.csproj
+obj/

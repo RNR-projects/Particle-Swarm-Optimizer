@@ -10,6 +10,7 @@ public class IlluminationPointsCreator
     private List<GameObject> instantiatedObjects;
     private List<float> illuminationPointXCoords;
     private List<float> illuminationPointYCoords;
+    private GameObject parentObject;
     public static IlluminationPointsCreator Instance()
     {
         if (sharedInstance == null)
@@ -21,7 +22,7 @@ public class IlluminationPointsCreator
     {
         this.illuminationPointXCoords = new List<float>();
         this.illuminationPointYCoords = new List<float>();
-        this.instantiatedObjects = new List<GameObject>();
+        this.instantiatedObjects = new List<GameObject>();   
     }
 
     public void RegisterIlluminationPoint(GameObject prefab)
@@ -35,6 +36,10 @@ public class IlluminationPointsCreator
         gameObject.transform.localScale = new Vector3(.02f * GlobalScaler.Instance().GetGlobalScale(), 
                                                         .02f * GlobalScaler.Instance().GetGlobalScale(), 
                                                         .15f * GlobalScaler.Instance().GetGlobalScale());
+        if (this.parentObject == null)
+            this.parentObject = GameObject.Find("Swarm");
+        gameObject.transform.parent = this.parentObject.transform;
+
         this.instantiatedObjects.Add(gameObject);
     }
 

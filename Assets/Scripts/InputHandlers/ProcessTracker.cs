@@ -4,7 +4,6 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class ProcessTracker : MonoBehaviour {
-	public Texture2D tex;
 	[SerializeField] private SwarmOptimizer swarm;
 	public GameObject structure;
 	[SerializeField] GameObject AreaLayoutObjects, MainMenuObjects, SwarmOptimizerObjects;
@@ -38,20 +37,22 @@ public class ProcessTracker : MonoBehaviour {
 		Camera.main.GetComponent<CameraMovement>().SetVerticalAngle(0);
 		Camera.main.GetComponent<CameraMovement>().SetHorizontalAngle(0);
 
-		Cursor.SetCursor(tex, new Vector2(0, 0), CursorMode.Auto);
+		//Cursor.SetCursor(tex, new Vector2(0, 0), CursorMode.Auto);
 		Cursor.lockState = CursorLockMode.Locked;
 
 		AreaLayoutObjects.GetComponentInChildren<GridCreator>().CreateNewGrid();
 	}
 
 	public void ToSwarm() {
-		Camera.main.transform.position = new Vector3(0, 2 * GlobalScaler.Instance().GetGlobalScale(), 0);
+		Camera.main.transform.position = new Vector3(0, 2 * GlobalScaler.Instance().GetGlobalScale(), 
+						OptimizationParameterManager.Instance().GetRoadWidth() * GlobalScaler.Instance().GetGlobalScale() / 2f);
 		Camera.main.GetComponent<CameraMovement> ().SetVerticalAngle(0);
-		Camera.main.GetComponent<CameraMovement> ().SetHorizontalAngle(0);
+		Camera.main.GetComponent<CameraMovement> ().SetHorizontalAngle(90);
 
 		MainMenuObjects.SetActive(false);
 		SwarmOptimizerObjects.SetActive(true);
 
+		swarm.ClearData();
 		RoadAndLuminaireCreator.Instance().CreateRoad();
 		IlluminationPointsCreator.Instance().InitializeIlluminationPoints();
 		StructureBuilder.Instance().CreateStructures();
@@ -59,8 +60,7 @@ public class ProcessTracker : MonoBehaviour {
 		swarm.InitializeOptimization();
 
 		this.currentStep = OptimizationSteps.SwarmOptimization;
-		Cursor.lockState = CursorLockMode.Locked;
-		Cursor.SetCursor (tex, new Vector2 (0, 0), CursorMode.Auto);
+		//Cursor.SetCursor (tex, new Vector2 (0, 0), CursorMode.Auto);
 
 	}
 
@@ -83,6 +83,19 @@ public class ProcessTracker : MonoBehaviour {
 
 		MainMenuObjects.SetActive(true);
     }
+
+	public void ReturnToSwarm()
+    {
+		Camera.main.transform.position = new Vector3(0, 2 * GlobalScaler.Instance().GetGlobalScale(),
+						OptimizationParameterManager.Instance().GetRoadWidth() * GlobalScaler.Instance().GetGlobalScale() / 2f);
+		Camera.main.GetComponent<CameraMovement>().SetVerticalAngle(0);
+		Camera.main.GetComponent<CameraMovement>().SetHorizontalAngle(90);
+
+		MainMenuObjects.SetActive(false);
+		SwarmOptimizerObjects.SetActive(true);
+
+		this.currentStep = OptimizationSteps.SwarmOptimization;
+	}
 
 	public OptimizationSteps GetCurrentStep()
     {

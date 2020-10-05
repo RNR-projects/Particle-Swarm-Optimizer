@@ -15,6 +15,7 @@ public class BuildingLocationsManager
 	private List<float> buildingHeights;
 	//private int[] temporarySecondCorner;
 	private GameObject builderUI;
+	private bool clearedBlocks;
 
 	public static BuildingLocationsManager Instance()
     {
@@ -31,6 +32,7 @@ public class BuildingLocationsManager
 		this.buildingYEdge2 = new List<int>();
 		this.isCompletingNewSet = false;
 		this.buildingHeights = new List<float>();
+		clearedBlocks = false;
 		//this.temporarySecondCorner = new int[2];
 	}
 
@@ -66,20 +68,28 @@ public class BuildingLocationsManager
 
 	public void Reset()
 	{
-		this.buildingXEdge1.Clear();
-		this.buildingXEdge2.Clear();
-		this.buildingYEdge1.Clear();
-		this.buildingYEdge2.Clear();
-		this.isCompletingNewSet = false;
-		foreach(GameObject block in this.structuresToCreate)
-			block.GetComponent<GridInteraction>().SelectBlock(false);
+		if (!clearedBlocks)
+		{
+			this.buildingXEdge1.Clear();
+			this.buildingXEdge2.Clear();
+			this.buildingYEdge1.Clear();
+			this.buildingYEdge2.Clear();
+			this.isCompletingNewSet = false;
+			foreach (GameObject block in this.structuresToCreate)
+			{
+				GridInteraction interaction = block.GetComponent<GridInteraction>();
+				if (interaction != null)
+					interaction.SelectBlock(false);
+			}
 
-		Cursor.lockState = CursorLockMode.Locked;
-		Cursor.visible = true;
+			Cursor.lockState = CursorLockMode.Locked;
+			Cursor.visible = true;
+		}
 	}
 
 	public void InitializeStructurePlaceHolders(int numRows, int numCols)
     {
+		clearedBlocks = false;
 		this.structuresToCreate = new GameObject[numRows, numCols];
     }
 
@@ -181,6 +191,7 @@ public class BuildingLocationsManager
 				(Mathf.Abs(this.buildingYEdge1[i] - this.buildingYEdge2[i]) + 1) * GlobalScaler.Instance().GetGlobalScale()));
 		}
 
+		clearedBlocks = true;
 		return buildingSizes;
     }
 }

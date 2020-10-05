@@ -12,6 +12,7 @@ public class RoadAndLuminaireCreator
     private List<GameObject> instantiatedLuminaires;
     private List<float> luminaireXCoords;
     private List<float> luminaireYCoords;
+    private GameObject parentObject;
 
     public static RoadAndLuminaireCreator Instance()
     {
@@ -46,6 +47,9 @@ public class RoadAndLuminaireCreator
         GameObject road = GameObject.Instantiate(this.roadPrefab, new Vector3(roadLength / 2f * scale, -scale, 
             roadWidth / 2f * scale), Quaternion.Euler(0, 0, 0));
         road.transform.localScale = new Vector3(roadLength / 10f * scale, scale, roadWidth / 10f * scale);
+        if (this.parentObject == null)
+            this.parentObject = GameObject.Find("Swarm");
+        road.transform.parent = this.parentObject.transform;
 
         this.instantiatedRoad = road;
     }
@@ -91,6 +95,10 @@ public class RoadAndLuminaireCreator
                 (particle.height / 2f - 1f) * scale, this.luminaireYCoords[i] * scale),
                 Quaternion.Euler(0, 0, 0));
             lampPost.transform.localScale = new Vector3(.25f * scale, particle.height / 2f * scale, .25f * scale);
+            if (this.parentObject == null)
+                this.parentObject = GameObject.Find("Swarm");
+            lampPost.transform.parent = this.parentObject.transform;
+
             this.instantiatedLuminaires.Add(lampPost);
         }
     }

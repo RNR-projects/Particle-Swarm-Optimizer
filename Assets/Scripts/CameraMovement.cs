@@ -20,9 +20,10 @@ public class CameraMovement : MonoBehaviour {
             this.transform.Translate(move);
 
             this.horizontalAngle += Mathf.Clamp(Input.GetAxis("Mouse X"), -1, 1) * this.turnSpeed * Time.deltaTime;
-            this.verticalAngle += Mathf.Clamp(Input.GetAxis("Mouse Y"), -1, 1) * this.turnSpeed * Time.deltaTime;
-            this.transform.rotation = Quaternion.Euler(-this.verticalAngle, this.horizontalAngle, 0);
+            this.verticalAngle += Mathf.Clamp(Input.GetAxis("Mouse Y"), -1, 1) * this.turnSpeed * Time.deltaTime; 
         }
+
+        this.transform.rotation = Quaternion.Euler(-this.verticalAngle, this.horizontalAngle, 0);
     }
 
     public void SetHorizontalAngle(float value)
