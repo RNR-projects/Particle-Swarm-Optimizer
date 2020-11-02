@@ -80,6 +80,8 @@ public class SwarmOptimizer : MonoBehaviour {
         {
 			ParticleSimulator.Instance().SimulateParticle(particles[i]);
 
+			yield return new WaitForSeconds(0.1f);
+
 			if (particles[i].averageIlluminance >= parameters.GetMinimumAverageIlluminance() &&
 				particles[i].averageIlluminance <= parameters.GetMaximumAverageIlluminance())
 			{
@@ -105,23 +107,43 @@ public class SwarmOptimizer : MonoBehaviour {
 
         this.SetBest(particles);
 
-		yield return new WaitForSeconds(.01f);
+		//yield return new WaitForSeconds(.1f);
 
 		StartCoroutine(this.OptimizeSwarm(particles));	
     }
 
     IEnumerator OptimizeSwarm(List<SolutionParticle> particles)
     {
+		OptimizationParameterManager parameters = OptimizationParameterManager.Instance();
         for (int i = 0; i < iterationsToRun; i++)
         {
 			RoadAndLuminaireCreator.Instance().ClearLuminaires();
 
 			List<SolutionParticle> trialParticles = this.AdjustParticles(particles);
 			//check if the new parameters of the particles is better than the old ones
-			this.RunIteration(trialParticles);
-			//if they are better, replace the previous particle with its newer version
-            for (int j = 0; j < particleCount; j++)
-            {
+			//this.RunIteration(trialParticles);
+			
+			for (int j = 0; j < particleCount; j++)
+			{
+				particles[j].xOffset = 0;
+
+				ParticleSimulator.Instance().SimulateParticle(particles[j]);
+				
+				yield return new WaitForSeconds(0.1f);
+				
+				if (particles[j].averageIlluminance >= parameters.GetMinimumAverageIlluminance() &&
+							particles[j].averageIlluminance <= parameters.GetMaximumAverageIlluminance())
+					trialDevFromAverage[j] = 0;
+				else if (particles[j].averageIlluminance < parameters.GetMinimumAverageIlluminance())
+					trialDevFromAverage[j] = parameters.GetMinimumAverageIlluminance() - particles[j].averageIlluminance;
+				else
+					trialDevFromAverage[j] = particles[j].averageIlluminance - parameters.GetMaximumAverageIlluminance();
+				if (particles[j].lowestIlluminanceAtAPoint >= parameters.GetMinimumIlluminanceAtAnyPoint())
+					trialDevFromMinimum[j] = 0;
+				else
+					trialDevFromMinimum[j] = parameters.GetMinimumIlluminanceAtAnyPoint() - particles[j].lowestIlluminanceAtAPoint;
+			
+				//if they are better, replace the previous particle with its newer version
                 if (particles[j].spacing > 0 && particles[j].height > 0)
                 {
                     if (trialDevFromAverage[j] < this.devFromAverage[j])
@@ -157,9 +179,9 @@ public class SwarmOptimizer : MonoBehaviour {
 				//if (!this.bestIsBuildable)
 				//	InitializeOptimization ();
 			}
-			yield return new WaitForSeconds (.01f);
+			yield return new WaitForSeconds (1.0f);
         }
-		yield return new WaitForSeconds(1f);
+		//yield return new WaitForSeconds(1.0f);
 		ParticleSimulator.Instance().RepeatSimulatedParticle(this.bestParticle);
 	}
 
@@ -238,7 +260,7 @@ public class SwarmOptimizer : MonoBehaviour {
 		return ParticleGenerator.Instance().CopyParticles(particles);
 	}
 
-	private void RunIteration(List<SolutionParticle> particles)
+	/*private void RunIteration(List<SolutionParticle> particles)
     {
 		OptimizationParameterManager parameters = OptimizationParameterManager.Instance();
 
@@ -260,7 +282,7 @@ public class SwarmOptimizer : MonoBehaviour {
 			else
 				trialDevFromMinimum[j] = parameters.GetMinimumIlluminanceAtAnyPoint() - particles[j].lowestIlluminanceAtAPoint;
 		}
-	}
+	}*/
 
     private void RegisterBetterParticle(int index, List<SolutionParticle> trueParticleList, SolutionParticle betterParticle)
     {
@@ -311,7 +333,7 @@ public class SwarmOptimizer : MonoBehaviour {
 			}
 			else
             {
-				failedStage3Candidates.Add(particles[stage2CandidateIndices[i]].lightingEfficiency);
+				failedStage3Candidates.Add(stage2Candidates[i] - OptimizationParameterManager.Instance().GetMinimumTargetEnergyGeneration());
 				failedStage3CandidateIndices.Add(stage2CandidateIndices[i]);
             }
 		}

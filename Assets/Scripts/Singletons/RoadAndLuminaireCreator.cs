@@ -40,18 +40,32 @@ public class RoadAndLuminaireCreator
 
     public void CreateRoad()
     {
-        float scale = GlobalScaler.Instance().GetGlobalScale();
-        float roadLength = OptimizationParameterManager.Instance().GetRoadLength();
-        float roadWidth = OptimizationParameterManager.Instance().GetRoadWidth();
+        if (instantiatedRoad == null)
+        {
+            float scale = GlobalScaler.Instance().GetGlobalScale();
+            float roadLength = OptimizationParameterManager.Instance().GetRoadLength();
+            float roadWidth = OptimizationParameterManager.Instance().GetRoadWidth();
 
-        GameObject road = GameObject.Instantiate(this.roadPrefab, new Vector3(roadLength / 2f * scale, -scale, 
-            roadWidth / 2f * scale), Quaternion.Euler(0, 0, 0));
-        road.transform.localScale = new Vector3(roadLength / 10f * scale, scale, roadWidth / 10f * scale);
-        if (this.parentObject == null)
-            this.parentObject = GameObject.Find("Swarm");
-        road.transform.parent = this.parentObject.transform;
+            GameObject road = GameObject.Instantiate(this.roadPrefab, new Vector3(roadLength / 2f * scale, -scale,
+                roadWidth / 2f * scale), Quaternion.Euler(0, 0, 0));
+            road.transform.localScale = new Vector3(roadLength / 10f * scale, scale, roadWidth / 10f * scale);
+            if (this.parentObject == null)
+                this.parentObject = GameObject.Find("Swarm");
+            road.transform.parent = this.parentObject.transform;
 
-        this.instantiatedRoad = road;
+            this.instantiatedRoad = road;
+        }
+        else
+        {
+            float scale = GlobalScaler.Instance().GetGlobalScale();
+            float roadLength = OptimizationParameterManager.Instance().GetRoadLength();
+            float roadWidth = OptimizationParameterManager.Instance().GetRoadWidth();
+
+            instantiatedRoad.SetActive(true);
+            instantiatedRoad.transform.position = new Vector3(roadLength / 2f * scale, -scale,
+                roadWidth / 2f * scale);
+            instantiatedRoad.transform.localScale = new Vector3(roadLength / 10f * scale, scale, roadWidth / 10f * scale);
+        }
     }
 
     public void CreateLuminaires(SolutionParticle particle)
@@ -91,15 +105,25 @@ public class RoadAndLuminaireCreator
                 }
             }
 
-            GameObject lampPost = GameObject.Instantiate(this.luminairePrefab, new Vector3(this.luminaireXCoords[i] * scale,
-                (particle.height / 2f - 1f) * scale, this.luminaireYCoords[i] * scale),
-                Quaternion.Euler(0, 0, 0));
-            lampPost.transform.localScale = new Vector3(.25f * scale, particle.height / 2f * scale, .25f * scale);
-            if (this.parentObject == null)
-                this.parentObject = GameObject.Find("Swarm");
-            lampPost.transform.parent = this.parentObject.transform;
+            if (instantiatedLuminaires.Count <= i)
+            {
+                GameObject lampPost = GameObject.Instantiate(this.luminairePrefab, new Vector3(this.luminaireXCoords[i] * scale,
+                    (particle.height / 2f - 1f) * scale, this.luminaireYCoords[i] * scale),
+                    Quaternion.Euler(0, 0, 0));
+                lampPost.transform.localScale = new Vector3(.25f * scale, particle.height / 2f * scale, .25f * scale);
+                if (this.parentObject == null)
+                    this.parentObject = GameObject.Find("Swarm");
+                lampPost.transform.parent = this.parentObject.transform;
 
-            this.instantiatedLuminaires.Add(lampPost);
+                this.instantiatedLuminaires.Add(lampPost);
+            }
+            else
+            {
+                instantiatedLuminaires[i].SetActive(true);
+                instantiatedLuminaires[i].transform.position = new Vector3(this.luminaireXCoords[i] * scale,
+                    (particle.height / 2f - 1f) * scale, this.luminaireYCoords[i] * scale);
+                instantiatedLuminaires[i].transform.localScale = new Vector3(.25f * scale, particle.height / 2f * scale, .25f * scale);
+            }
         }
     }
 
@@ -120,18 +144,21 @@ public class RoadAndLuminaireCreator
 
     public void ClearLuminaires()
     {
-        foreach (GameObject gameObject in this.instantiatedLuminaires)
+        for (int i = 0; i < luminaireXCoords.Count; i++)
         {
-            GameObject.Destroy(gameObject);
+            //GameObject.Destroy(instantiatedLuminaires[i]);
+            instantiatedLuminaires[i].SetActive(false);
         }
-        this.instantiatedLuminaires.Clear();
+        //this.instantiatedLuminaires.Clear();
         this.luminaireXCoords.Clear();
         this.luminaireYCoords.Clear();
     }
 
     public void ClearRoad()
     {
-        GameObject.Destroy(this.instantiatedRoad);
-        this.instantiatedRoad = null;
+        //GameObject.Destroy(this.instantiatedRoad);
+        //this.instantiatedRoad = null;
+        if (instantiatedRoad != null)
+            instantiatedRoad.SetActive(false);
     }
 }

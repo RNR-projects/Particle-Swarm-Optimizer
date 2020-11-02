@@ -40,9 +40,9 @@ public class StructureBuilder
 
     public void ClearStructures()
     {
-        foreach (GameObject structure in this.structures)
+        for (int i = 0; i < structures.Count; i++)
         {
-            GameObject.Destroy(structure);
+            GameObject.Destroy(structures[i]);
         }
         this.structures.Clear();
     }

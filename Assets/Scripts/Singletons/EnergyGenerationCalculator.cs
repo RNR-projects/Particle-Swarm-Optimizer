@@ -190,18 +190,25 @@ public class EnergyGenerationCalculator
 		float margin = parameters.GetRoadLength() % particle.spacing / 2f;
 		if (Mathf.Min(energyGeneration) < parameters.GetMinimumTargetEnergyGeneration())
 		{
-			if (particle.xOffset == 0)
+			/*float adjustmentValue = 1;
+			if (margin / 5.0f > 1)
+				adjustmentValue = margin / 3.0f;*/
+			if (particle.xOffset == 0 && margin > 0.25f)
 			{
 				particle.xOffset = -margin;
+				RoadAndLuminaireCreator.Instance().ClearLuminaires();
 				ParticleSimulator.Instance().SimulateParticle(particle);
 			}
-			else if (particle.xOffset + 1f <= margin)
+			else if (particle.xOffset == -margin)
 			{
-				particle.xOffset++;
+				particle.xOffset = margin;
+				RoadAndLuminaireCreator.Instance().ClearLuminaires();
 				ParticleSimulator.Instance().SimulateParticle(particle);
 			}
 			else
-				particle.lowestEnergyGeneratedByALuminaire = Mathf.Min(energyGeneration);			
+			{
+				particle.lowestEnergyGeneratedByALuminaire = Mathf.Min(energyGeneration);
+			}
 		}
 		else
 			particle.lowestEnergyGeneratedByALuminaire = Mathf.Min(energyGeneration);

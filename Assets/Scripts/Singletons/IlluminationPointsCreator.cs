@@ -69,8 +69,8 @@ public class IlluminationPointsCreator
 
     public void ClearIlluminationPoints()
     {
-        foreach (GameObject gameObject in this.instantiatedObjects)
-            GameObject.Destroy(gameObject);
+        for (int i = 0; i < instantiatedObjects.Count; i++)
+            GameObject.Destroy(instantiatedObjects[i]);
         this.instantiatedObjects.Clear();
         this.illuminationPointXCoords.Clear();
         this.illuminationPointYCoords.Clear();

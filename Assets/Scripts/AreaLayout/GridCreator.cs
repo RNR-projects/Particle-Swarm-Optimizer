@@ -114,9 +114,9 @@ public class GridCreator : MonoBehaviour {
 
 	public void ClearGridObjects()
 	{
-		foreach (GameObject item in this.gridObjects)
+		for (int i = 0; i < gridObjects.Count; i++)
 		{
-			Destroy(item);
+			Destroy(gridObjects[i]);
 		}
 		this.gridObjects.Clear();
 	}

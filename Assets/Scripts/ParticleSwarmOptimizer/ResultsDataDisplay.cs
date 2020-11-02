@@ -48,19 +48,17 @@ public class ResultsDataDisplay : MonoBehaviour
         {
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = true;
-        }
 
-        
-
-        particleBasicsDisplay.text = "Iteration " + swarm.GetIterationsDone() +
+            particleBasicsDisplay.text = "Iteration " + swarm.GetIterationsDone() +
                                     "\nHeight: " + bestParticle.height +
                                     "\nSpacing: " + bestParticle.spacing;
 
-        particleSpecificsDisplay.text = "Average: " + bestParticle.averageIlluminance +
-                                        "\nMin: " + bestParticle.lowestIlluminanceAtAPoint +
-                                        "\nEfficiency:" + bestParticle.lightingEfficiency +
-                                        "\nOffset:" + (bestParticle.xOffset +
-                                        OptimizationParameterManager.Instance().GetRoadLength() % bestParticle.spacing / 2f);
+            particleSpecificsDisplay.text = "Average: " + bestParticle.averageIlluminance +
+                                            "\nMin: " + bestParticle.lowestIlluminanceAtAPoint +
+                                            "\nEfficiency:" + bestParticle.lightingEfficiency +
+                                            "\nOffset:" + (bestParticle.xOffset +
+                                            OptimizationParameterManager.Instance().GetRoadLength() % bestParticle.spacing / 2f);
+        }
     }
 
     private IEnumerator RemoveBar()
